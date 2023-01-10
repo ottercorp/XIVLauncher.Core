@@ -39,11 +39,6 @@
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Release'">
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
     <PathMap>$(AppOutputBase)=C:\goatsoft\xl\XIVLauncher.Core\</PathMap>
-    <DefineConstants>TRACE;OSX;WINE_XIV_MACOS</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DefineConstants>TRACE;OSX;WINE_XIV_MACOS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
