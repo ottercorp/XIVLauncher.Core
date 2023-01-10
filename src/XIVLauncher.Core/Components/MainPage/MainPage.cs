@@ -1146,6 +1146,7 @@ public class MainPage : Page
 
     private async Task<bool> RepairGame(Launcher.LoginResult loginResult)
     {
+        /*
         var doLogin = false;
 
         // BUG(goat): This check only behaves correctly on Windows - the mutex doesn't seem to disappear on Linux, .NET issue?
