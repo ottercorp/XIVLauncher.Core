@@ -64,8 +64,8 @@ public class LoginFrame : Component
     public LoginFrame(MainPage mainPage)
     {
         this.mainPage = mainPage;
-        this.areaCombo = new Combo("����", SdoAreas.Select(area => area.AreaName).ToArray());
-        this.loginInput = new Input("ʢȤ�˺�", "������ʢȤ�˺�", new Vector2(12f, 0f), 128);
+        this.areaCombo = new Combo("大区", SdoAreas.Select(area => area.AreaName).ToArray());
+        this.loginInput = new Input("盛趣账号", "请输入盛趣账号", new Vector2(12f, 0f), 128);
         // this.passwordInput = new Input("Password", "Enter your password", new Vector2(12f, 0f), 128, flags: ImGuiInputTextFlags.Password | ImGuiInputTextFlags.NoUndoRedo);
 
         // this.loginInput = new Input("Username", "Enter your Username", new Vector2(12f, 0f), 128);

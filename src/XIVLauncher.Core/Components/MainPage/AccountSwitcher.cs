@@ -39,11 +39,11 @@ public class AccountSwitcher : Component
             {
                 var name = account.UserName;
 
-                if (account.UseSteamServiceAccount)
-                    name += " (Steam)";
-
-                if (account.UseOtp)
-                    name += " (OTP)";
+                // if (account.UseSteamServiceAccount)
+                //     name += " (Steam)";
+                //
+                // if (account.UseOtp)
+                //     name += " (OTP)";
 
                 var textLength = ImGui.CalcTextSize(name).X;
 

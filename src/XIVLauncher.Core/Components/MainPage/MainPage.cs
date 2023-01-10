@@ -52,7 +52,7 @@ public class MainPage : Page
         if (savedAccount != null) this.SwitchAccount(savedAccount, false);
 
         if (PlatformHelpers.IsElevated())
-            App.ShowMessage("XIVLauncher is running as administrator/root user.\nThis can cause various issues, including but not limited to addons failing to launch and hotkey applications failing to respond.\n\nPlease take care to avoid running XIVLauncher with elevated privileges", "XIVLauncher");
+            App.ShowMessage("XIVLauncherCN is running as administrator/root user.\nThis can cause various issues, including but not limited to addons failing to launch and hotkey applications failing to respond.\n\nPlease take care to avoid running XIVLauncher with elevated privileges", "XIVLauncherCN");
 
         Troubleshooting.LogTroubleshooting();
     }
@@ -119,7 +119,7 @@ public class MainPage : Page
         {
             if (GameHelpers.CheckIsGameOpen() && action == LoginAction.Repair)
             {
-                App.ShowMessageBlocking("The game and/or the official launcher are open. XIVLauncher cannot repair the game if this is the case.\nPlease close them and try again.", "XIVLauncher");
+                App.ShowMessageBlocking("The game and/or the official launcher are open. XIVLauncherCN cannot repair the game if this is the case.\nPlease close them and try again.", "XIVLauncherCN");
 
                 Reactivate();
                 return;

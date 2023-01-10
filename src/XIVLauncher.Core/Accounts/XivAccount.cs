@@ -72,6 +72,7 @@ public class XivAccount
 
     public string? FindCharacterThumb()
     {
+        return null;
         if (string.IsNullOrEmpty(ChosenCharacterName) || string.IsNullOrEmpty(ChosenCharacterWorld))
             return null;
 
