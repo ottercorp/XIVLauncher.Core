@@ -77,9 +77,8 @@ public class KeychainSecretProvider : ISecretProvider
         {
             if (ex.Type == ErrorType.NotFound)
                 return null;
-            // Get password before storing will make the exception unable to track.
-            // throw;
-            return null;
+
+            throw;
         }
     }
 

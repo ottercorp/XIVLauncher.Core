@@ -11,8 +11,9 @@ using XIVLauncher.Common;
 using XIVLauncher.Common.Dalamud;
 using XIVLauncher.Common.Game.Patch.Acquisition;
 using XIVLauncher.Common.PlatformAbstractions;
-// using XIVLauncher.Common.Windows;
-// using XIVLauncher.Common.Unix;
+using XIVLauncher.Common.Support;
+using XIVLauncher.Common.Windows;
+using XIVLauncher.Common.Unix;
 using XIVLauncher.Common.Unix.Compatibility;
 using XIVLauncher.Common.Util;
 using XIVLauncher.Core.Accounts.Secrets;
@@ -20,8 +21,6 @@ using XIVLauncher.Core.Accounts.Secrets.Providers;
 using XIVLauncher.Core.Components.LoadingPage;
 using XIVLauncher.Core.Configuration;
 using XIVLauncher.Core.Configuration.Parsers;
-using XIVLauncher.Common.Windows;
-using XIVLauncher.Common.Unix;
 
 namespace XIVLauncher.Core;
 
@@ -46,7 +45,7 @@ class Program
     private static bool showImGuiDemoWindow = true;
 
     private static LauncherApp launcherApp;
-    private static Storage storage;
+    public static Storage storage;
     public static DirectoryInfo DotnetRuntime => storage.GetFolder("runtime");
 
     // TODO: We don't have the steamworks api for this yet.
@@ -63,15 +62,9 @@ class Program
         invalidationFrames = frames;
     }
 
-    private static void SetupLogging()
+    private static void SetupLogging(string[] args)
     {
-        Log.Logger = new LoggerConfiguration()
-                     .WriteTo.Async(a =>
-                         a.File(Path.Combine(storage.GetFolder("logs").FullName, "launcher.log")))
-                     .WriteTo.Console()
-                     .WriteTo.Debug()
-                     .MinimumLevel.Verbose()
-                     .CreateLogger();
+        LogInit.Setup(Path.Combine(storage.GetFolder("logs").FullName, "launcher.log"), args);
 
         Log.Information("========================================================");
         Log.Information("Starting a session(v{Version} - {Hash})", AppUtil.GetAssemblyVersion(), AppUtil.GetGitHash());
@@ -130,7 +123,7 @@ class Program
     private static void Main(string[] args)
     {
         storage = new Storage(APP_NAME);
-        SetupLogging();
+        SetupLogging(args);
         LoadConfig(storage);
 
         Secrets = GetSecretProvider(storage);
@@ -186,22 +179,6 @@ class Program
 #endif
 
         // Create window, GraphicsDevice, and all resources necessary for the demo.
-        try
-        {
-            var runtimes = new List<string>();
-
-            var directory = new DirectoryInfo(Path.Join(Directory.GetCurrentDirectory(),"runtimes"));
-            foreach (var subdir in directory.GetDirectories())
-            {
-                runtimes.Add(Path.Join("runtimes",subdir.Name,"native"));
-            }
-
-            AppUtil.AddEnvironmentPaths(runtimes);
-        }
-        catch (Exception e)
-        {
-            Log.Error("Native runtime can't added");
-        }
         VeldridStartup.CreateWindowAndGraphicsDevice(
             new WindowCreateInfo(50, 50, 1280, 800, WindowState.Normal, $"XIVLauncherCN {version}"),
             new GraphicsDeviceOptions(false, null, true, ResourceBindingModel.Improved, true, true),
@@ -225,13 +202,15 @@ class Program
 
         var needUpdate = false;
 
+#if FLATPAK
         if (Config.DoVersionCheck ?? false)
         {
             var versionCheckResult = UpdateCheck.CheckForUpdate().GetAwaiter().GetResult();
 
             if (versionCheckResult.Success)
                 needUpdate = versionCheckResult.NeedUpdate;
-        }
+        }   
+#endif
 
         launcherApp = new LauncherApp(storage, needUpdate);
 

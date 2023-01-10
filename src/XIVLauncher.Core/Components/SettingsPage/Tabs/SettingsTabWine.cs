@@ -30,7 +30,7 @@ public class SettingsTabWine : SettingsTab
                 CheckVisibility = () => RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
                 CheckValidity = b =>
                 {
-                    if (b == true && !File.Exists("/usr/lib/libgamemodeauto.so.0"))
+                    if (b == true && (!File.Exists("/usr/lib/libgamemodeauto.so.0") && !File.Exists("/app/lib/libgamemodeauto.so.0")))
                         return "GameMode not detected.";
 
                     return null;
@@ -114,6 +114,7 @@ public class SettingsTabWine : SettingsTab
     public override void Save()
     {
         base.Save();
-        Program.CreateCompatToolsInstance();
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            Program.CreateCompatToolsInstance();
     }
 }

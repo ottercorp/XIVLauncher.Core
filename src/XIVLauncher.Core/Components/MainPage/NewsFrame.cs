@@ -97,10 +97,10 @@ public class NewsFrame : Component
 
                 if (ImGui.BeginChild("####NewsEntry"))
                 {
-                    foreach (News newsEntry in this.headlines.News)
-                    {
-                        ShowNewsEntry(newsEntry);
-                    }
+                foreach (News newsEntry in this.headlines.News)
+                {
+                    ShowNewsEntry(newsEntry);
+                }
                     ImGui.EndChild();
                 }
 

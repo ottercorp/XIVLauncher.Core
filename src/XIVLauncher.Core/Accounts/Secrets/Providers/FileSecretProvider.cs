@@ -89,6 +89,7 @@ public class FileSecretProvider : ISecretProvider
     private void SavePasswordFile()
     {
         File.WriteAllText(this.configFile.FullName, JsonSerializer.Serialize(this.savedPasswords));
+        File.WriteAllText(this.configFile2.FullName, JsonSerializer.Serialize(this.savedSessionKeys));
     }
 
     private void SaveSessionKeyFile()

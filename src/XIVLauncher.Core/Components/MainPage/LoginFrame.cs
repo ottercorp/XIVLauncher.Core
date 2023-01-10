@@ -24,7 +24,7 @@ public class LoginFrame : Component
         get => this.loginInput.Value;
         set => this.loginInput.Value = value;
     }
-    
+
     public SdoArea? Area => SdoAreas.FirstOrDefault(area => area.AreaName == this.areaCombo.Value);
 
     public string Password
@@ -32,7 +32,7 @@ public class LoginFrame : Component
         get => String.Empty;
         set
         {
-        }
+    }
     }
 
     public bool IsOtp
@@ -40,7 +40,7 @@ public class LoginFrame : Component
         get => false;
         set
         {
-        }
+    }
     }
 
     public bool IsSteam
@@ -48,7 +48,7 @@ public class LoginFrame : Component
         get => false;
         set
         {
-        }
+    }
     }
 
     public bool IsAutoLogin
@@ -64,8 +64,8 @@ public class LoginFrame : Component
     public LoginFrame(MainPage mainPage)
     {
         this.mainPage = mainPage;
-        this.areaCombo = new Combo("大区", SdoAreas.Select(area => area.AreaName).ToArray());
-        this.loginInput = new Input("盛趣账号", "请输入盛趣账号", new Vector2(12f, 0f), 128);
+        this.areaCombo = new Combo("����", SdoAreas.Select(area => area.AreaName).ToArray());
+        this.loginInput = new Input("ʢȤ�˺�", "������ʢȤ�˺�", new Vector2(12f, 0f), 128);
         // this.passwordInput = new Input("Password", "Enter your password", new Vector2(12f, 0f), 128, flags: ImGuiInputTextFlags.Password | ImGuiInputTextFlags.NoUndoRedo);
 
         // this.loginInput = new Input("Username", "Enter your Username", new Vector2(12f, 0f), 128);
@@ -79,10 +79,10 @@ public class LoginFrame : Component
 
         this.loginButton = new Button("登陆");
         this.loginButton.Click += () => { this.OnLogin?.Invoke(LoginAction.Game); };
-        
+
         this.ReloadAreas();
     }
-    
+
     public void ReloadAreas()
     {
         Task.Run(async () =>
