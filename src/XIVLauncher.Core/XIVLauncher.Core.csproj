@@ -39,6 +39,11 @@
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Release'">
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
     <PathMap>$(AppOutputBase)=C:\goatsoft\xl\XIVLauncher.Core\</PathMap>
+    <DefineConstants>TRACE;OSX;WINE_XIV_MACOS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DefineConstants>TRACE;OSX;WINE_XIV_MACOS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -98,6 +103,13 @@
   <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win10-x64'">
     <Resource Remove="Resources/binaries/aria2c-xl.exe" />
     <Content Include="Resources/binaries/aria2c-xl.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Remove="Resources/binaries/sdologinentry64.dll" />
+    <Content Include="Resources/binaries/sdologinentry64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
