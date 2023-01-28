@@ -270,30 +270,42 @@ public class MainPage : Page
             if (checkResult.State == Launcher.LoginState.NeedsPatchGame)
                 return checkResult;
             if (username == null) username = string.Empty;
-            var autoLoginSessionKey = App.Accounts.CurrentAccount.AutoLoginSessionKey;
+            var autoLoginSessionKey = String.Empty;
+            var autoLogin = string.IsNullOrEmpty(password) && this.loginFrame.IsAutoLogin;
+            try
+            {
+                autoLoginSessionKey = App.Accounts.CurrentAccount.AutoLoginSessionKey;
+            }
+            catch (Exception ex)
+            {
+                autoLoginSessionKey = null;
+                autoLogin = false;
+                Log.Error(ex, "Could not get auto login session key.");
+            }
+            
             return await App.Launcher.LoginSdo(
                 username,
                 password,
                 (state, msg) =>
-        {
+                {
                     // LoginMessage = msg;
                     Log.Information(msg);
 
                     if (state == Launcher.SdoLoginState.GotQRCode)
-        {
+                    {
                         App.AskForQr();
                         new Task(() =>
-        {
+                        {
                             App.WaitForQr(() => App.Launcher.CancelLogin());
                         }).Start();
-        }
+                    }
                     else if (state == Launcher.SdoLoginState.LoginSucess || state == Launcher.SdoLoginState.LoginFail || state == Launcher.SdoLoginState.OutTime)
-        {
+                    {
                         App.CloseQr();
-        }
+                    }
                 },
                 action == LoginAction.ForceQR,
-                string.IsNullOrEmpty(password) && this.loginFrame.IsAutoLogin,
+                autoLogin,
                 autoLoginSessionKey
             ).ConfigureAwait(false);
         }
