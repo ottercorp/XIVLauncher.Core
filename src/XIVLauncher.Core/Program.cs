@@ -86,7 +86,7 @@ class Program
 
         Config.GamePath ??= storage.GetFolder("ffxiv");
         Config.GameConfigPath ??= storage.GetFolder("ffxivConfig");
-        Config.ClientLanguage ??= ClientLanguage.English;
+        Config.ClientLanguage ??= ClientLanguage.ChineseSimplified;
         Config.DpiAwareness ??= DpiAwareness.Unaware;
         Config.IsAutologin ??= false;
         Config.CompletedFts ??= false;
@@ -97,7 +97,6 @@ class Program
         Config.IsEncryptArgs ??= true;
         Config.IsFt ??= false;
         Config.IsOtpServer ??= false;
-        Config.DxvkFrameLimit = 0;
 
         Config.PatchPath ??= storage.GetFolder("patch");
         Config.PatchAcquisitionMethod ??= AcquisitionMethod.Aria;
