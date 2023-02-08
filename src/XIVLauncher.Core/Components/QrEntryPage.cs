@@ -56,8 +56,8 @@ public class QrEntryPage : Page
                 var posX = (ImGui.GetWindowSize().X - qrImage.Size.X) * 0.5f;
                 var posY = ImGui.GetCursorPosY();
                 var drawList = ImGui.GetWindowDrawList();
-                drawList.AddRectFilled(new Vector2(bPos.X + posX - 10, bPos.Y + posY - 10),
-                    new Vector2(bPos.X + posX + qrImage.Size.X + 10, bPos.Y + posY + qrImage.Size.Y + 10), 0xffffffff);
+                drawList.AddRectFilled(new Vector2(bPos.X + posX - 20, bPos.Y + posY - 20),
+                    new Vector2(bPos.X + posX + qrImage.Size.X + 20, bPos.Y + posY + qrImage.Size.Y + 20), 0xffffffff);
                 ImGui.SetCursorPosX(posX);
                 ImGui.Image(qrImage.ImGuiHandle, qrImage.Size);
                 ImGui.Dummy(new Vector2(10, 10));
