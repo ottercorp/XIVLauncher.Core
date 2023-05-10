@@ -429,9 +429,9 @@ public class MainPage : Page
 
         Debug.Assert(loginResult.State == Launcher.LoginState.Ok);
 
-        if (loginResult.State == Launcher.LoginState.Ok && App.Accounts.CurrentAccount != null && loginResult.OauthLogin.AutoLoginSessionKey != null)
+        if (loginResult.State == Launcher.LoginState.Ok && App.Accounts.CurrentAccount != null && loginResult.OauthLogin?.AutoLoginSessionKey != string.Empty)
         {
-            App.Accounts.CurrentAccount.AutoLoginSessionKey = loginResult.OauthLogin.AutoLoginSessionKey;
+            App.Accounts.CurrentAccount.AutoLoginSessionKey = loginResult.OauthLogin!.AutoLoginSessionKey;
             App.Accounts.Save();
         }
 
