@@ -48,6 +48,7 @@ public class SettingsTabGame : SettingsTab
         {
             CheckVisibility = () => false,
         },
+        new SettingsEntry<bool>("Ignore Steam", "Check this if you do not want XIVLauncher to communicate with Steam (Requires Restart).", () => Program.Config.IsIgnoringSteam ?? false, x => Program.Config.IsIgnoringSteam = x),
     };
 
     public override string Title => "Game";

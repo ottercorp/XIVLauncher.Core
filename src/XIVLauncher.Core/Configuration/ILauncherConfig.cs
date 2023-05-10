@@ -47,6 +47,8 @@ public interface ILauncherConfig
     public bool? IsOtpServer { get; set; }
     public int? SelectedServer { get; set; }
 
+    public bool? IsIgnoringSteam { get; set; }
+
     #region Patching
 
     public DirectoryInfo? PatchPath { get; set; }
