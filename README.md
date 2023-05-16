@@ -23,5 +23,6 @@ XIVLauncher Core 具有适用于各种 Linux 发行版的社区包。 请注意�
 | 仓库        | 状态      |
 | ----------- | ----------- |
 | [**Flathub (official)**](https://flathub.org/apps/details/cn.ottercorp.xivlaunchercn) | ![Flathub](https://img.shields.io/flathub/v/cn.ottercorp.xivlaunchercn) |
-| [AUR](https://aur.archlinux.org/packages/xivlauncher-cn) | ![AUR version](https://img.shields.io/aur/version/xivlauncher-cn) |
+| [AUR](https://aur.archlinux.org/packages/xivlauncher-cn-git) | ![AUR version](https://img.shields.io/aur/version/xivlauncher-cn-git) |
 | [MPR (Debian+Ubuntu)](https://mpr.makedeb.org/packages/xivlauncher-cn)  | ![MPR package](https://repology.org/badge/version-for-repo/mpr/xivlauncher-cn.svg?header=MPR) |
+| [PRM (Fedora+Opensuse)](https://github.com/bamdragonfly/lure-repo)  | ![RPM package](https://img.shields.io/badge/RPM-1.0.2.2-pink) |
