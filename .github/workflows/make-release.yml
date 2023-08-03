@@ -3,7 +3,7 @@ name: "Release XLCore"
 on:
   push:
     tags:
-      - "*.*.*"
+      - "*.*.*.*"
 
 permissions:
   contents: write
