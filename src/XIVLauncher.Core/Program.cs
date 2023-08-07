@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.IO;
 using CheapLoc;
 using Config.Net;
 using ImGuiNET;
@@ -49,10 +50,16 @@ class Program
     public static DirectoryInfo DotnetRuntime => storage.GetFolder("runtime");
 
     // TODO: We don't have the steamworks api for this yet.
-    public static bool IsSteamDeckHardware => Directory.Exists("/home/deck");
-    public static bool IsSteamDeckGamingMode => Steam != null && Steam.IsValid && Steam.IsRunningOnSteamDeck();
+    public static bool IsSteamDeckHardware => CoreEnvironmentSettings.IsDeck.HasValue ?
+        CoreEnvironmentSettings.IsDeck.Value :
+        Directory.Exists("/home/deck") || (CoreEnvironmentSettings.IsDeckGameMode ?? false) || (CoreEnvironmentSettings.IsDeckFirstRun ?? false);
+    public static bool IsSteamDeckGamingMode => CoreEnvironmentSettings.IsDeckGameMode.HasValue ?
+        CoreEnvironmentSettings.IsDeckGameMode.Value :
+        Steam != null && Steam.IsValid && Steam.IsRunningOnSteamDeck();
 
     private const string APP_NAME = "xlcore_cn";
+
+    private static string[] mainargs;
 
     private static uint invalidationFrames = 0;
     private static Vector2 lastMousePosition;
@@ -97,7 +104,7 @@ class Program
         Config.IsEncryptArgs ??= true;
         Config.IsFt ??= false;
         Config.IsOtpServer ??= false;
-        Config.IsIgnoringSteam ??= false;
+        Config.IsIgnoringSteam = CoreEnvironmentSettings.UseSteam.HasValue ? !CoreEnvironmentSettings.UseSteam.Value : Config.IsIgnoringSteam ?? false;
 
         Config.PatchPath ??= storage.GetFolder("patch");
         Config.PatchAcquisitionMethod ??= AcquisitionMethod.Aria;
@@ -111,11 +118,14 @@ class Program
         Config.DxvkAsyncEnabled ??= true;
         Config.ESyncEnabled ??= true;
         Config.FSyncEnabled ??= false;
+        Config.SetWin7 ??= true;
 
         Config.WineStartupType ??= WineStartupType.Managed;
         Config.WineBinaryPath ??= "/usr/bin";
         Config.WineDebugVars ??= "-all";
-        Config.WineEnv ??= "";
+
+        Config.FixLDP ??= false;
+        Config.FixIM ??= false;
     }
 
     public const uint STEAM_APP_ID = 39210;
@@ -123,13 +133,45 @@ class Program
 
     private static void Main(string[] args)
     {
+        mainargs = args;
         storage = new Storage(APP_NAME);
-        SetupLogging(args);
+
+        if (CoreEnvironmentSettings.ClearAll)
+        {
+            ClearAll();
+        }
+        else
+        {
+            if (CoreEnvironmentSettings.ClearSettings) ClearSettings();
+            if (CoreEnvironmentSettings.ClearPrefix) ClearPrefix();
+            if (CoreEnvironmentSettings.ClearPlugins) ClearPlugins();
+            if (CoreEnvironmentSettings.ClearTools) ClearTools();
+            if (CoreEnvironmentSettings.ClearLogs) ClearLogs();
+        }
+
+        SetupLogging(mainargs);
         LoadConfig(storage);
 
         Secrets = GetSecretProvider(storage);
 
         Loc.SetupWithFallbacks();
+
+        uint appId, altId;
+        string appName, altName;
+        if (Config.IsFt.Value)
+        {
+            appId = STEAM_APP_ID_FT;
+            altId = STEAM_APP_ID;
+            appName = "FFXIV Free Trial";
+            altName = "FFXIV Retail";
+        }
+        else
+        {
+            appId = STEAM_APP_ID;
+            altId = STEAM_APP_ID_FT;
+            appName = "FFXIV Retail";
+            altName = "FFXIV Free Trial";
+        }
         try
         {
             switch (Environment.OSVersion.Platform)
@@ -149,13 +191,12 @@ class Program
             {
                 try
                 {
-                    var appId = Config.IsFt == true ? STEAM_APP_ID_FT : STEAM_APP_ID;
                     Steam.Initialize(appId);
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Couldn't init Steam with game AppIds, trying FT");
-                    Steam.Initialize(STEAM_APP_ID_FT);
+                    Log.Error(ex, $"Couldn't init Steam with AppId={appId} ({appName}), trying AppId={altId} ({altName})");
+                    Steam.Initialize(altId);
                 }
             }
         }
@@ -214,6 +255,8 @@ class Program
                 needUpdate = versionCheckResult.NeedUpdate;
         }
 #endif
+
+        needUpdate = CoreEnvironmentSettings.IsUpgrade ? true : needUpdate;
 
         launcherApp = new LauncherApp(storage, needUpdate);
 
@@ -278,6 +321,8 @@ class Program
         var winePrefix = storage.GetFolder("wineprefix");
         var wineSettings = new WineSettings(Config.WineStartupType, Config.WineBinaryPath, Config.WineDebugVars, wineLogFile, winePrefix, Config.ESyncEnabled, Config.FSyncEnabled, Config.ModernMvkEnabled, Config.WineEnv);
         var toolsFolder = storage.GetFolder("compatibilitytool");
+        Directory.CreateDirectory(Path.Combine(toolsFolder.FullName, "dxvk"));
+        Directory.CreateDirectory(Path.Combine(toolsFolder.FullName, "beta"));
         CompatibilityTools = new CompatibilityTools(wineSettings, Config.DxvkHudType, Config.GameModeEnabled, Config.DxvkAsyncEnabled, Config.DxvkFrameLimit, toolsFolder);
     }
 
@@ -304,17 +349,17 @@ class Program
                 return new FileSecretProvider(storage.GetFile(secretsFilePath));
 
             case "KEYRING":
-            {
-                var keyChain = new KeychainSecretProvider();
-
-                if (!keyChain.IsAvailable)
                 {
-                    Log.Error("An org.freedesktop.secrets provider is not available - no secrets will be stored");
-                    return new DummySecretProvider();
-                }
+                    var keyChain = new KeychainSecretProvider();
 
-                return keyChain;
-            }
+                    if (!keyChain.IsAvailable)
+                    {
+                        Log.Error("An org.freedesktop.secrets provider is not available - no secrets will be stored");
+                        return new DummySecretProvider();
+                    }
+
+                    return keyChain;
+                }
 
             case "NONE":
                 return new DummySecretProvider();
@@ -322,5 +367,73 @@ class Program
             default:
                 throw new ArgumentException($"Invalid secret provider: {envVar}");
         }
+    }
+
+    public static void ClearSettings(bool tsbutton = false)
+    {
+        if (storage.GetFile("launcher.ini").Exists) storage.GetFile("launcher.ini").Delete();
+        if (tsbutton)
+        {
+            LoadConfig(storage);
+            launcherApp.State = LauncherApp.LauncherState.Settings;
+        }
+    }
+
+    public static void ClearPrefix()
+    {
+        storage.GetFolder("wineprefix").Delete(true);
+        storage.GetFolder("wineprefix");
+    }
+
+    public static void ClearPlugins(bool tsbutton = false)
+    {
+        storage.GetFolder("dalamud").Delete(true);
+        storage.GetFolder("dalamudAssets").Delete(true);
+        storage.GetFolder("installedPlugins").Delete(true);
+        storage.GetFolder("runtime").Delete(true);
+        if (storage.GetFile("dalamudUI.ini").Exists) storage.GetFile("dalamudUI.ini").Delete();
+        if (storage.GetFile("dalamudConfig.json").Exists) storage.GetFile("dalamudConfig.json").Delete();
+        storage.GetFolder("dalamud");
+        storage.GetFolder("dalamudAssets");
+        storage.GetFolder("installedPlugins");
+        storage.GetFolder("runtime");
+        if (tsbutton)
+        {
+            DalamudLoadInfo = new DalamudOverlayInfoProxy();
+            DalamudUpdater = new DalamudUpdater(storage.GetFolder("dalamud"), storage.GetFolder("runtime"), storage.GetFolder("dalamudAssets"), storage.Root, null, null)
+            {
+                Overlay = DalamudLoadInfo
+            };
+            DalamudUpdater.Run();
+        }
+    }
+
+    public static void ClearTools(bool tsbutton = false)
+    {
+        storage.GetFolder("compatibilitytool").Delete(true);
+        storage.GetFolder("compatibilitytool/beta");
+        storage.GetFolder("compatibilitytool/dxvk");
+        if (tsbutton) CreateCompatToolsInstance();
+    }
+
+    public static void ClearLogs(bool tsbutton = false)
+    {
+        storage.GetFolder("logs").Delete(true);
+        storage.GetFolder("logs");
+        string[] logfiles = { "dalamud.boot.log", "dalamud.boot.old.log", "dalamud.log", "dalamud.injector.log" };
+        foreach (string logfile in logfiles)
+            if (storage.GetFile(logfile).Exists) storage.GetFile(logfile).Delete();
+        if (tsbutton)
+            SetupLogging(mainargs);
+
+    }
+
+    public static void ClearAll(bool tsbutton = false)
+    {
+        ClearSettings(tsbutton);
+        ClearPrefix();
+        ClearPlugins(tsbutton);
+        ClearTools(tsbutton);
+        ClearLogs(true);
     }
 }

@@ -19,6 +19,17 @@ public class FtsPage : Page
 
     public void OpenFtsIfNeeded()
     {
+        if (CoreEnvironmentSettings.IsDeckFirstRun.HasValue)
+        {
+            if (CoreEnvironmentSettings.IsDeckFirstRun.Value)
+            {
+                App.State = LauncherApp.LauncherState.Fts;
+                return;
+            }
+            else
+                return;
+        }
+        
         if (!(App.Settings.CompletedFts ?? false) && Program.IsSteamDeckHardware)
         {
             App.State = LauncherApp.LauncherState.Fts;
@@ -27,6 +38,8 @@ public class FtsPage : Page
 
         if (Program.IsSteamDeckHardware && (Program.Steam == null || !Program.Steam.IsValid))
         {
+            // If IsIgnoringSteam == true, skip the error screen. This fixes a bug with Steam Deck always showing the Fts Error screen.
+            if (App.Settings.IsIgnoringSteam ?? false) return;
             App.State = LauncherApp.LauncherState.Fts;
             this.isSteamDeckAppIdError = true;
         }

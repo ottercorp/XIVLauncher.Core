@@ -44,6 +44,7 @@ public class MainPage : Page
 
         this.loginFrame.OnLogin += this.ProcessLogin;
         this.actionButtons.OnSettingsButtonClicked += () => this.App.State = LauncherApp.LauncherState.Settings;
+        this.actionButtons.OnStatusButtonClicked += () => AppUtil.OpenBrowser("https://is.xivup.com/");
 
         this.Padding = new Vector2(32f, 32f);
 
@@ -282,7 +283,7 @@ public class MainPage : Page
                 autoLogin = false;
                 Log.Error(ex, "Could not get auto login session key.");
             }
-            
+
             return await App.Launcher.LoginSdo(
                 username,
                 password,
@@ -441,7 +442,7 @@ public class MainPage : Page
 
             try
             {
-                using var process = await StartGameAndAddon(loginResult, isSteam, action == LoginAction.GameNoDalamud, false).ConfigureAwait(false);
+                using var process = await StartGameAndAddon(loginResult, isSteam, action == LoginAction.GameNoDalamud, action == LoginAction.GameNoThirdparty).ConfigureAwait(false);
 
                 if (process is null)
                     throw new Exception("Could not obtain Process Handle");
@@ -689,9 +690,20 @@ public class MainPage : Page
 
         Troubleshooting.LogTroubleshooting();
 
-        var dalamudLauncher = new DalamudLauncher(dalamudRunner, Program.DalamudUpdater, App.Settings.DalamudLoadMethod.GetValueOrDefault(DalamudLoadMethod.DllInject),
-            App.Settings.GamePath, App.Storage.Root, App.Settings.ClientLanguage ?? ClientLanguage.ChineseSimplified, App.Settings.DalamudLoadDelay, false, false, noThird,
-            Troubleshooting.GetTroubleshootingJson());
+        var dalamudLauncher = new DalamudLauncher(
+            dalamudRunner,
+            Program.DalamudUpdater,
+            App.Settings.DalamudLoadMethod.GetValueOrDefault(DalamudLoadMethod.DllInject),
+            App.Settings.GamePath,
+            App.Storage.Root,
+            // App.Storage.GetFolder("logs"),
+            App.Settings.ClientLanguage ?? ClientLanguage.ChineseSimplified,
+            App.Settings.DalamudLoadDelay,
+            false,
+            false,
+            noThird,
+            Troubleshooting.GetTroubleshootingJson()
+        );
 
         try
         {
@@ -751,7 +763,52 @@ public class MainPage : Page
 
         IGameRunner runner;
 
-        var gameArgs = App.Settings.AdditionalArgs ?? string.Empty;
+        // Hack: Strip out gameoverlayrenderer.so entries from LD_PRELOAD
+        if (App.Settings.FixLDP.Value)
+        {
+            var ldpreload = CoreEnvironmentSettings.GetCleanEnvironmentVariable("LD_PRELOAD", "gameoverlayrenderer.so");
+            System.Environment.SetEnvironmentVariable("LD_PRELOAD", ldpreload);
+        }
+
+        // Hack: XMODIFIERS=@im=null
+        if (App.Settings.FixIM.Value)
+        {
+            System.Environment.SetEnvironmentVariable("XMODIFIERS", "@im=null");
+        }
+
+        // Deal with "Additional Arguments". VAR=value %command% -args
+        var launchOptions = (App.Settings.AdditionalArgs ?? string.Empty).Split("%command%", 2);
+        var launchEnv = "";
+        var gameArgs = "";
+
+        // If there's only one launch option (no %command%) figure out whether it's args or env variables.
+        if (launchOptions.Length == 1)
+        {
+            if (launchOptions[0].StartsWith('-'))
+                gameArgs = launchOptions[0];
+            else
+                launchEnv = launchOptions[0];
+        }
+        else
+        {
+            launchEnv = launchOptions[0] ?? "";
+            gameArgs = launchOptions[1] ?? "";
+        }
+
+        if (!string.IsNullOrEmpty(launchEnv))
+        {
+            foreach (var envvar in launchEnv.Split(null))
+            {
+                if (!envvar.Contains('=')) continue;    // ignore entries without an '='
+                var kvp = envvar.Split('=', 2);
+                if (kvp[0].EndsWith('+'))               // if key ends with +, then it's actually key+=value
+                {
+                    kvp[0] = kvp[0].TrimEnd('+');
+                    kvp[1] = (System.Environment.GetEnvironmentVariable(kvp[0]) ?? "") + kvp[1];
+                }
+                System.Environment.SetEnvironmentVariable(kvp[0], kvp[1]);
+            }
+        }
 
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
         {
@@ -766,7 +823,7 @@ public class MainPage : Page
                 else if (!Directory.Exists(App.Settings.WineBinaryPath))
                     throw new Exception("Custom wine binary path is invalid: no such directory.\n" +
                         "Check path carefully for typos: " + App.Settings.WineBinaryPath);
-                else if (!File.Exists(Path.Combine(App.Settings.WineBinaryPath,"wine64")))
+                else if (!File.Exists(Path.Combine(App.Settings.WineBinaryPath, "wine64")))
                     throw new Exception("Custom wine binary path is invalid: no wine64 found at that location.\n" +
                         "Check path carefully for typos: " + App.Settings.WineBinaryPath);
             }
@@ -777,8 +834,10 @@ public class MainPage : Page
             var _ = Task.Run(async () =>
             {
                 var tempPath = App.Storage.GetFolder("temp");
+                var winver = (App.Settings.SetWin7 ?? true) ? "win7" : "win10";
 
                 await Program.CompatibilityTools.EnsureTool(tempPath).ConfigureAwait(false);
+                Program.CompatibilityTools.RunInPrefix($"winecfg /v {winver}");
 
                 var gameFixApply = new GameFixApply(App.Settings.GamePath, App.Settings.GameConfigPath, Program.CompatibilityTools.Settings.Prefix, tempPath);
                 gameFixApply.UpdateProgress += (text, hasProgress, progress) =>

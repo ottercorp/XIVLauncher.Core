@@ -71,8 +71,6 @@ public class NewsFrame : Component
         {
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(32f, 32f));
 
-            //ImGui.Text("awooga");
-
             if (this.newsLoaded)
             {
                 var banner = this.banners[this.currentBanner];
@@ -95,17 +93,15 @@ public class NewsFrame : Component
                     }
                 }
 
-                if (ImGui.BeginChild("####NewsEntry"))
-                {
+                ImGui.TextDisabled("News");
                 foreach (News newsEntry in this.headlines.News)
                 {
                     ShowNewsEntry(newsEntry);
                 }
-                    ImGui.EndChild();
-                }
 
-                ImGui.Separator();
+                // ImGui.Spacing();
 
+                // ImGui.TextDisabled("Topics");
                 // foreach (News topic in this.headlines.Topics)
                 // {
                 //     ShowNewsEntry(topic);
@@ -120,7 +116,6 @@ public class NewsFrame : Component
         }
 
         ImGui.EndChild();
-
         base.Draw();
     }
 }

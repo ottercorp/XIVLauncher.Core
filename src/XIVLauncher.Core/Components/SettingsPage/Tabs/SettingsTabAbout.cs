@@ -25,43 +25,31 @@ public class SettingsTabAbout : SettingsTab
 
     public override void Draw()
     {
-        ImGui.Text($"This is XIVLauncher Core v{AppUtil.GetAssemblyVersion()}({AppUtil.GetGitHash()})");
-        ImGui.Text("By goaaats & Bluefissure");
+        ImGui.Image(this.logoTexture.ImGuiHandle, new Vector2(256) * ImGuiHelpers.GlobalScale);
 
-#if FLATPAK
-        ImGui.TextColored(ImGuiColors.DalamudRed, "THIS IS A FLATPAK!!!");
-#endif
+        ImGui.Text($"XIVLauncher Core v{AppUtil.GetAssemblyVersion()}({AppUtil.GetGitHash()})");
+        ImGui.Text("By goaaats & Bluefissure");
 
         if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
             AppUtil.OpenBrowser("https://github.com/goaaats");
 
         ImGui.Dummy(new Vector2(20));
 
-        if (ImGui.Button("Open GitHub"))
+        if (ImGui.Button("Open Repository"))
         {
-            AppUtil.OpenBrowser("https://github.com/ottercorp/FFXIVQuickLauncher");
+            AppUtil.OpenBrowser("https://github.com/ottercorp/XIVLauncher.Core");
         }
 
-        if (ImGui.Button("Join our Discord"))
+        if (ImGui.Button("Join our QQ Guild"))
         {
-            AppUtil.OpenBrowser("https://discord.gg/QSDmvXG");
+            AppUtil.OpenBrowser("https://pd.ottercorp.net");
         }
 
-        if (ImGui.Button("See software licenses"))
+        if (ImGui.Button("See Software Licenses"))
         {
             PlatformHelpers.OpenBrowser(Path.Combine(AppContext.BaseDirectory, "license.txt"));
         }
 
-        if (ImGui.Button("Generate Troubleshooting Pack"))
-        {
-            PackGenerator.SavePack(Program.storage);
-            PlatformHelpers.OpenBrowser(Program.storage.GetFolder("logs").FullName);
-        }
-
-        ImGui.Dummy(new Vector2(20));
-
-        ImGui.Image(this.logoTexture.ImGuiHandle, new Vector2(256) * ImGuiHelpers.GlobalScale);
-            
         base.Draw();
     }
 }

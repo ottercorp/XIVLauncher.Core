@@ -6,7 +6,7 @@ public class SettingsTabGame : SettingsTab
 {
     public override SettingsEntry[] Entries { get; } =
     {
-        new SettingsEntry<DirectoryInfo>("Game Path", "Where the game is installed to.", () => Program.Config.GamePath, x => Program.Config.GamePath = x)
+        new SettingsEntry<DirectoryInfo>("Game Path", "Where the game is or will be installed.", () => Program.Config.GamePath, x => Program.Config.GamePath = x)
         {
             CheckValidity = x =>
             {
@@ -20,7 +20,7 @@ public class SettingsTabGame : SettingsTab
             }
         },
 
-        new SettingsEntry<DirectoryInfo>("Game Config Path", "Where the user config files will be stored.", () => Program.Config.GameConfigPath, x => Program.Config.GameConfigPath = x)
+        new SettingsEntry<DirectoryInfo>("Game Configuration Path", "Where your user config files will be stored.", () => Program.Config.GameConfigPath, x => Program.Config.GameConfigPath = x)
         {
             CheckValidity = x => string.IsNullOrWhiteSpace(x?.FullName) ? "Game Config Path is not set." : null,
 
@@ -49,6 +49,7 @@ public class SettingsTabGame : SettingsTab
             CheckVisibility = () => false,
         },
         new SettingsEntry<bool>("Ignore Steam", "Check this if you do not want XIVLauncher to communicate with Steam (Requires Restart).", () => Program.Config.IsIgnoringSteam ?? false, x => Program.Config.IsIgnoringSteam = x),
+        new SettingsEntry<bool>("Use Experimental UID Cache", "Tries to save your login token for the next start. Can result in launching with expired sessions.\nDisable if receiving FFXIV error 1012 or 500X.", () => Program.Config.IsUidCacheEnabled ?? false, x => Program.Config.IsUidCacheEnabled = x),
     };
 
     public override string Title => "Game";

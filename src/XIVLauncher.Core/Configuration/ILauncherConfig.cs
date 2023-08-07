@@ -82,6 +82,12 @@ public interface ILauncherConfig
     public string? WineDebugVars { get; set; }
     public string? WineEnv { get; set; }
 
+    public bool? FixLDP { get; set; }
+
+    public bool? FixIM { get; set; }
+
+    public bool? SetWin7 { get; set; }
+
     #endregion
 
     #region Dalamud

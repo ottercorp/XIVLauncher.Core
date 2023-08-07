@@ -29,7 +29,7 @@ namespace XIVLauncher.Core.Support
 
             try
             {
-                var fixedContext = context?.Split(new []{'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                var fixedContext = context?.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
 
                 var payload = new ExceptionPayload
                 {
@@ -65,7 +65,7 @@ namespace XIVLauncher.Core.Support
 
         internal static string GetTroubleshootingJson()
         {
-            
+
             var gamePath = Program.Config.GamePath;
 
             var integrity = TroubleshootingPayload.IndexIntegrityResult.Success;
@@ -93,7 +93,7 @@ namespace XIVLauncher.Core.Support
             {
                 integrity = TroubleshootingPayload.IndexIntegrityResult.Exception;
             }
-            
+
             var ffxivVer = Repository.Ffxiv.GetVer(gamePath);
             var ffxivVerBck = Repository.Ffxiv.GetVer(gamePath, true);
             var ex1Ver = Repository.Ex1.GetVer(gamePath);
@@ -117,7 +117,7 @@ namespace XIVLauncher.Core.Support
                 EncryptArguments = Program.Config.IsEncryptArgs.GetValueOrDefault(true),
                 LauncherVersion = AppUtil.GetAssemblyVersion(),
                 LauncherHash = AppUtil.GetGitHash() ?? "<unavailable>",
-                Official = AppUtil.GetBuildOrigin() == "goatcorp/FFXIVQuickLauncher",
+                Official = AppUtil.GetBuildOrigin() == "ottercorp/XIVLauncher.Core",
                 DpiAwareness = Program.Config.DpiAwareness.GetValueOrDefault(),
                 Platform = PlatformHelpers.GetPlatform(),
 
