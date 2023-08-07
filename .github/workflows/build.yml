@@ -2,9 +2,9 @@ name: "Build XLCore"
 
 on:
   push:
-    branches: [main]
+    branches: [cn]
   pull_request:
-    branches: [main]
+    branches: [cn]
   workflow_dispatch:
 
 jobs:
