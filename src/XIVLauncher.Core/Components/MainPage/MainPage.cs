@@ -406,8 +406,8 @@ public class MainPage : Page
                 return false;
             }
 
-            loginResult.State = Launcher.LoginState.Ok;
-            action = LoginAction.Game;
+            App.ShowMessageBlocking("Game is successfully patched, you can login now.");
+            return false;
         }
 
         if (loginResult.State == Launcher.LoginState.NeedRetry)
@@ -430,9 +430,11 @@ public class MainPage : Page
 
         Debug.Assert(loginResult.State == Launcher.LoginState.Ok);
 
-        if (loginResult.State == Launcher.LoginState.Ok && App.Accounts.CurrentAccount != null && loginResult.OauthLogin?.AutoLoginSessionKey != string.Empty)
+        if (loginResult.State == Launcher.LoginState.Ok
+            && App.Accounts.CurrentAccount != null
+            && !String.IsNullOrEmpty(loginResult.OauthLogin?.AutoLoginSessionKey))
         {
-            App.Accounts.CurrentAccount.AutoLoginSessionKey = loginResult.OauthLogin!.AutoLoginSessionKey;
+            App.Accounts.CurrentAccount.AutoLoginSessionKey = loginResult.OauthLogin.AutoLoginSessionKey;
             App.Accounts.Save();
         }
 
