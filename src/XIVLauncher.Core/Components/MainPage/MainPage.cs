@@ -698,7 +698,7 @@ public class MainPage : Page
             App.Settings.DalamudLoadMethod.GetValueOrDefault(DalamudLoadMethod.DllInject),
             App.Settings.GamePath,
             App.Storage.Root,
-            // App.Storage.GetFolder("logs"),
+            App.Storage.GetFolder("logs"),
             App.Settings.ClientLanguage ?? ClientLanguage.ChineseSimplified,
             App.Settings.DalamudLoadDelay,
             false,
