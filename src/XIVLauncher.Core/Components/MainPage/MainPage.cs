@@ -888,6 +888,7 @@ public class MainPage : Page
             throw new NotImplementedException();
         }
 
+#if !OSX
         if (!Program.IsSteamDeckHardware)
         {
             Hide();
@@ -896,6 +897,7 @@ public class MainPage : Page
         {
             App.State = LauncherApp.LauncherState.SteamDeckPrompt;
         }
+#endif
 
         // We won't do any sanity checks here anymore, since that should be handled in StartLogin
         // var launchedProcess = App.Launcher.LaunchGame(runner,
@@ -967,17 +969,17 @@ public class MainPage : Page
         if (addonMgr.IsRunning)
             addonMgr.StopAddons();
 
-        // try
-        // {
-        //     if (App.Steam.IsValid)
-        //     {
-        //         App.Steam.Shutdown();
-        //     }
-        // }
-        // catch (Exception ex)
-        // {
-        //     Log.Error(ex, "Could not shut down Steam");
-        // }
+        try
+        {
+            if (App.Steam?.IsValid ?? false)
+            {
+                App.Steam.Shutdown();
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Could not shut down Steam");
+        }
 
         return launchedProcess!;
     }
