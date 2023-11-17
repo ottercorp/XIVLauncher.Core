@@ -278,7 +278,10 @@ public class MainPage : Page
             var autoLogin = string.IsNullOrEmpty(password) && this.loginFrame.IsAutoLogin;
             try
             {
-                autoLoginSessionKey = App.Accounts.CurrentAccount?.AutoLoginSessionKey;
+                if (autoLogin)
+                {
+                    autoLoginSessionKey = App.Accounts.CurrentAccount?.AutoLoginSessionKey;
+                }
             }
             catch (Exception ex)
             {
