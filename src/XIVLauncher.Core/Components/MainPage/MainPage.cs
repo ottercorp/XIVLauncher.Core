@@ -27,7 +27,7 @@ public class MainPage : Page
     private readonly LoginFrame loginFrame;
     private readonly NewsFrame newsFrame;
     private readonly ActionButtons actionButtons;
-    public SdoArea Area;
+    public SdoArea? Area;
 
     public bool IsLoggingIn { get; private set; }
 
@@ -265,23 +265,24 @@ public class MainPage : Page
         try
         {
             Area = loginFrame.Area;
+            if (Area == null)
+            {
+                throw new Exception("Area is not selected");
+            }
             var enableUidCache = App.Settings.IsUidCacheEnabled ?? false;
             var gamePath = App.Settings.GamePath;
             var checkResult = await App.Launcher.CheckGameUpdate(Area, gamePath, false);
             if (checkResult.State == Launcher.LoginState.NeedsPatchGame)
                 return checkResult;
-            if (username == null) username = string.Empty;
-            var autoLoginSessionKey = String.Empty;
+            string? autoLoginSessionKey = null;
             var autoLogin = string.IsNullOrEmpty(password) && this.loginFrame.IsAutoLogin;
             try
             {
-                autoLoginSessionKey = App.Accounts.CurrentAccount.AutoLoginSessionKey;
+                autoLoginSessionKey = App.Accounts.CurrentAccount?.AutoLoginSessionKey;
             }
             catch (Exception ex)
             {
-                autoLoginSessionKey = null;
-                autoLogin = false;
-                Log.Error(ex, "Could not get auto login session key.");
+                Log.Error(ex, "Could not get auto login session key");
             }
 
             return await App.Launcher.LoginSdo(
@@ -289,20 +290,21 @@ public class MainPage : Page
                 password,
                 (state, msg) =>
                 {
-                    // LoginMessage = msg;
                     Log.Information(msg);
-
-                    if (state == Launcher.SdoLoginState.GotQRCode)
+                    switch (state)
                     {
-                        App.AskForQr();
-                        new Task(() =>
-                        {
-                            App.WaitForQr(() => App.Launcher.CancelLogin());
-                        }).Start();
-                    }
-                    else if (state == Launcher.SdoLoginState.LoginSucess || state == Launcher.SdoLoginState.LoginFail || state == Launcher.SdoLoginState.OutTime)
-                    {
-                        App.CloseQr();
+                        case Launcher.SdoLoginState.GotQRCode:
+                            App.AskForQr();
+                            new Task(() =>
+                            {
+                                App.WaitForQr(() => App.Launcher.CancelLogin());
+                            }).Start();
+                            break;
+                        case Launcher.SdoLoginState.LoginSucess:
+                        case Launcher.SdoLoginState.LoginFail:
+                        case Launcher.SdoLoginState.OutTime:
+                            App.CloseQr();
+                            break;
                     }
                 },
                 action == LoginAction.ForceQR,
@@ -432,7 +434,7 @@ public class MainPage : Page
 
         if (loginResult.State == Launcher.LoginState.Ok
             && App.Accounts.CurrentAccount != null
-            && !String.IsNullOrEmpty(loginResult.OauthLogin?.AutoLoginSessionKey))
+            && !string.IsNullOrEmpty(loginResult.OauthLogin?.AutoLoginSessionKey))
         {
             App.Accounts.CurrentAccount.AutoLoginSessionKey = loginResult.OauthLogin.AutoLoginSessionKey;
             App.Accounts.Save();
