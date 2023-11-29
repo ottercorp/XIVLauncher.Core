@@ -26,4 +26,4 @@ XIVLauncher Core 具有适用于各种 Linux 发行版的社区包。 请注意�
 | [AUR](https://aur.archlinux.org/packages/xivlauncher-cn-git) | ![AUR version](https://img.shields.io/aur/version/xivlauncher-cn-git) |
 | [MPR (Debian+Ubuntu)](https://mpr.makedeb.org/packages/xivlauncher-cn)  | ![MPR package](https://repology.org/badge/version-for-repo/mpr/xivlauncher-cn.svg?header=MPR) |
 | [PRM (Fedora+Opensuse)](https://github.com/bamdragonfly/lure-repo)  | ![RPM package](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbamdragonfly%2Flure-repo%2Fmaster%2Fxivlauncher-cn%2Fversion.json&query=%24.version&prefix=v&label=RPM&color=pink)|
-| [Chiyuki-Overlay (Gentoo)](https://github.com/IllyaTheHath/gentoo-overlay)  | ![Ebuild package](https://img.shields.io/badge/Ebuild-1.0.3.1-6E56AF) |
+| [Chiyuki-Overlay (Gentoo)](https://github.com/IllyaTheHath/gentoo-overlay)  | ![Ebuild package](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2FIllyaTheHath%2Fgentoo-overlay%2Fmaster%2Fgames-util%2Fxivlauncher-cn%2Fversion.xml&query=%2F%2Fversion&prefix=v&label=Ebuild&color=6E56AF) |
