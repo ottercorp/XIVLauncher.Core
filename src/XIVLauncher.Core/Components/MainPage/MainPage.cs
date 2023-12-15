@@ -1204,10 +1204,14 @@ public class MainPage : Page
         var dlFailureLoc = Loc.Localize("PatchManDlFailure",
             "XIVLauncher could not verify the downloaded game files. Please restart and try again.\n\nThis usually indicates a problem with your internet connection.\nIf this error persists, try using a VPN set to Japan.\n\nContext: {0}\n{1}");
 
+        var sdoPatchMissingFailureLoc = Loc.Localize("SdoPatchMissing",
+            "游戏补丁列表的早期补丁被删除，导致无法通过补丁安装游戏，请手动安装游戏客户端并设置包含 game 文件夹的游戏路径。\nContext: {0}\n{1}");
+
         switch (reason)
         {
             case PatchManager.FailReason.DownloadProblem:
-                App.ShowMessageBlocking(string.Format(dlFailureLoc, "Problem", versionId), "XIVLauncherCN Error");
+                var errorMsg = (versionId == "2014.03.24.0001.000") ? sdoPatchMissingFailureLoc : dlFailureLoc;
+                App.ShowMessageBlocking(string.Format(errorMsg, "Problem", versionId), "XIVLauncherCN Error");
                 break;
 
             case PatchManager.FailReason.HashCheck:
