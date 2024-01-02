@@ -12,7 +12,8 @@ public class LoginFrame : Component
 
     private readonly Input loginInput;
     private readonly Combo areaCombo;
-    // private readonly Input passwordInput;
+    private bool showPasswordInput = false;
+    private readonly Input passwordInput;
     // private readonly Checkbox oneTimePasswordCheckbox;
     // private readonly Checkbox useSteamServiceCheckbox;
     private readonly Checkbox fastLoginCheckbox;
@@ -65,8 +66,8 @@ public class LoginFrame : Component
     {
         this.mainPage = mainPage;
         this.areaCombo = new Combo("大区", SdoAreas.Select(area => area.AreaName).ToArray());
-        this.loginInput = new Input("盛趣账号", "请输入盛趣账号", new Vector2(12f, 0f), 128);
-        // this.passwordInput = new Input("Password", "Enter your password", new Vector2(12f, 0f), 128, flags: ImGuiInputTextFlags.Password | ImGuiInputTextFlags.NoUndoRedo);
+        this.loginInput = new Input("账号", "请输入账号", new Vector2(12f, 0f), 128);
+        this.passwordInput = new Input("密码", "请输入密码", new Vector2(12f, 0f), 1280, flags: ImGuiInputTextFlags.Password | ImGuiInputTextFlags.NoUndoRedo);
 
         // this.loginInput = new Input("Username", "Enter your Username", new Vector2(12f, 0f), 128);
         // this.passwordInput = new Input("Password", "Enter your password", new Vector2(12f, 0f), 128, flags: ImGuiInputTextFlags.Password | ImGuiInputTextFlags.NoUndoRedo);
@@ -109,6 +110,11 @@ public class LoginFrame : Component
         return new Vector2(-1, vp.Y - 128f);
     }
 
+    private void TogglePasswordInput()
+    {
+        this.showPasswordInput = !this.showPasswordInput;
+    }
+
     public override void Draw()
     {
         if (ImGui.BeginChild("###loginFrame", this.GetSize()))
@@ -116,7 +122,10 @@ public class LoginFrame : Component
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(32f, 32f));
             this.areaCombo.Draw();
             this.loginInput.Draw();
-            // this.passwordInput.Draw();
+            if (this.showPasswordInput)
+            {
+                this.passwordInput.Draw();
+            }
 
             // this.oneTimePasswordCheckbox.Draw();
             // this.useSteamServiceCheckbox.Draw();
@@ -136,37 +145,44 @@ public class LoginFrame : Component
 
             if (ImGui.BeginPopupContextItem(POPUP_ID_LOGINACTION))
             {
-                if (ImGui.MenuItem("Launch without Dalamud"))
+                if (ImGui.MenuItem("关闭 Dalamud 启动"))
                 {
                     this.OnLogin?.Invoke(LoginAction.GameNoDalamud);
                 }
 
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("Launch without custom repo plugins"))
+                if (ImGui.MenuItem("停用自定义库插件启动"))
                 {
                     this.OnLogin?.Invoke(LoginAction.GameNoThirdparty);
                 }
 
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("Patch without launching"))
+                if (ImGui.MenuItem("更新游戏，不启动"))
                 {
                     this.OnLogin?.Invoke(LoginAction.GameNoLaunch);
                 }
 
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("Repair game files"))
+                if (ImGui.MenuItem("修复游戏"))
                 {
                     this.OnLogin?.Invoke(LoginAction.Repair);
                 }
 
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("Force QR"))
+                if (ImGui.MenuItem("强制扫码"))
                 {
                     this.OnLogin?.Invoke(LoginAction.ForceQR);
+                }
+
+                ImGui.Separator();
+
+                if (ImGui.MenuItem("显示密码输入框"))
+                {
+                    this.TogglePasswordInput();
                 }
 
                 if (LauncherApp.IsDebug)
