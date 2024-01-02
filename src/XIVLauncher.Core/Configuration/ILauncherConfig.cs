@@ -82,6 +82,8 @@ public interface ILauncherConfig
     public string? WineDebugVars { get; set; }
     public string? WineEnv { get; set; }
 
+    public bool? FixLocale { get; set; }
+
     public bool? FixLDP { get; set; }
 
     public bool? FixIM { get; set; }
