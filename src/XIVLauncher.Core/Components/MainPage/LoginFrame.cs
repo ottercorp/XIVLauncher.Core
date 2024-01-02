@@ -145,42 +145,43 @@ public class LoginFrame : Component
 
             if (ImGui.BeginPopupContextItem(POPUP_ID_LOGINACTION))
             {
-                if (ImGui.MenuItem("关闭 Dalamud 启动"))
+                if (ImGui.MenuItem("启动但不加载 Dalamud"))
                 {
                     this.OnLogin?.Invoke(LoginAction.GameNoDalamud);
                 }
 
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("停用自定义库插件启动"))
+                if (ImGui.MenuItem("启动时禁用自定义库插件"))
                 {
                     this.OnLogin?.Invoke(LoginAction.GameNoThirdparty);
                 }
 
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("更新游戏，不启动"))
+                if (ImGui.MenuItem("更新游戏不启动"))
                 {
                     this.OnLogin?.Invoke(LoginAction.GameNoLaunch);
                 }
-
+                /*
                 ImGui.Separator();
 
                 if (ImGui.MenuItem("修复游戏"))
                 {
                     this.OnLogin?.Invoke(LoginAction.Repair);
                 }
+                */
 
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("强制扫码"))
+                if (ImGui.MenuItem("扫码登录"))
                 {
                     this.OnLogin?.Invoke(LoginAction.ForceQR);
                 }
 
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("显示密码输入框"))
+                if (ImGui.MenuItem("显示/隐藏密码框"))
                 {
                     this.TogglePasswordInput();
                 }
