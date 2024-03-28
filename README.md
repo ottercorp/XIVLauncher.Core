@@ -22,21 +22,8 @@ XIVLauncher Core 具有适用于各种 Linux 发行版的社区包。 请注意�
 
 | 仓库        | 状态      |
 | ----------- | ----------- |
-<<<<<<< HEAD
 | [**Flathub (official)**](https://flathub.org/apps/details/cn.ottercorp.xivlaunchercn) | ![Flathub](https://img.shields.io/flathub/v/cn.ottercorp.xivlaunchercn) |
 | [AUR](https://aur.archlinux.org/packages/xivlauncher-cn-git) | ![AUR version](https://img.shields.io/aur/version/xivlauncher-cn-git) |
 | [MPR (Debian+Ubuntu)](https://mpr.makedeb.org/packages/xivlauncher-cn)  | ![MPR package](https://repology.org/badge/version-for-repo/mpr/xivlauncher-cn.svg?header=MPR) |
 | [PRM (Fedora+Opensuse)](https://github.com/bamdragonfly/lure-repo)  | ![RPM package](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbamdragonfly%2Flure-repo%2Fmaster%2Fxivlauncher-cn%2Fversion.json&query=%24.version&prefix=v&label=RPM&color=pink)|
 | [Chiyuki-Overlay (Gentoo)](https://github.com/IllyaTheHath/gentoo-overlay)  | ![Ebuild package](https://img.shields.io/badge/Ebuild-1.0.3.1-6E56AF) |
-=======
-| [**Flathub (official)**](https://flathub.org/apps/details/dev.goats.xivlauncher) | ![Flathub](https://img.shields.io/flathub/v/dev.goats.xivlauncher) |
-| [AUR](https://aur.archlinux.org/packages/xivlauncher) | ![AUR version](https://img.shields.io/aur/version/xivlauncher) |
-| [AUR (git)](https://aur.archlinux.org/packages/xivlauncher-git) | ![AUR version](https://img.shields.io/aur/version/xivlauncher-git) |
-| [Copr (Fedora+openSuse+EL9)](https://copr.fedorainfracloud.org/coprs/rankyn/xivlauncher/) | ![COPR version](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frankynbass%2FXIVLauncher4rpm%2Fmain%2Fbadge.json)|
-| [GURU (Gentoo)](https://gitweb.gentoo.org/repo/proj/guru.git/tree/games-util/xivlauncher) | ![GURU version](https://repology.org/badge/version-for-repo/gentoo_ovl_guru/xivlauncher.core.svg?header=guru) |
-| [MPR (Debian+Ubuntu)](https://mpr.makedeb.org/packages/xivlauncher)  | ![MPR package](https://repology.org/badge/version-for-repo/mpr/xivlauncher.core.svg?header=MPR) |
-| [MPR (git) (Debian+Ubuntu)](https://mpr.makedeb.org/packages/xivlauncher-git)  | ![MPR package](https://repology.org/badge/version-for-repo/mpr/xivlauncher.core.svg?header=MPR) |
-| [nixpkgs stable](https://search.nixos.org/packages?channel=23.11&from=0&size=50&sort=relevance&type=packages&query=xivlauncher) | ![nixpkgs stable version](https://repology.org/badge/version-for-repo/nix_stable_23_11/xivlauncher.core.svg?header=nixpkgs%2023.11) |
-| [nixpkgs unstable](https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=xivlauncher) | ![nixpkgs unstable version](https://repology.org/badge/version-for-repo/nix_unstable/xivlauncher.core.svg?header=nixpkgs%20unstable) |
-| [PPA (Ubuntu)](https://launchpad.net/~linneris/+archive/ubuntu/xivlauncher-core-stable) | ![PPA version](https://img.shields.io/static/v1?label=PPA&message=1.0.5&color=brightgreen) |
->>>>>>> main
