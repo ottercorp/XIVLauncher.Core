@@ -30,10 +30,8 @@ public class LoginFrame : Component
 
     public string Password
     {
-        get => String.Empty;
-        set
-        {
-    }
+        get => this.passwordInput.Value;
+        set => this.passwordInput.Value = value;
     }
 
     public bool IsOtp
