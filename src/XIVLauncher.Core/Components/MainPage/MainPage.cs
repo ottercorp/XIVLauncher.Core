@@ -64,7 +64,7 @@ public class MainPage : Page
     {
         Debug.Assert(App.State == LauncherApp.LauncherState.Main);
 
-        if ((App.Settings.IsAutologin ?? false) && !string.IsNullOrEmpty(this.loginFrame.Username) && !string.IsNullOrEmpty(this.loginFrame.Password))
+		if ((App.Settings.IsAutologin ?? false) && !string.IsNullOrEmpty(this.loginFrame.Username) && !string.IsNullOrEmpty(this.loginFrame.Password))
             ProcessLogin(LoginAction.Game);
     }
 
@@ -140,8 +140,8 @@ public class MainPage : Page
             IsLoggingIn = true;
 
             App.Settings.IsAutologin = this.loginFrame.IsAutoLogin;
-
-            var result = await Login(loginFrame.Username, loginFrame.Password, loginFrame.IsOtp, loginFrame.IsSteam, false, action).ConfigureAwait(false);
+			
+			var result = await Login(loginFrame.Username, loginFrame.passwordInput.Value, loginFrame.IsOtp, loginFrame.IsSteam, false, action).ConfigureAwait(false);
 
             if (result)
             {

@@ -13,7 +13,7 @@ public class LoginFrame : Component
     private readonly Input loginInput;
     private readonly Combo areaCombo;
     private bool showPasswordInput = false;
-    private readonly Input passwordInput;
+    public readonly Input passwordInput;
     // private readonly Checkbox oneTimePasswordCheckbox;
     // private readonly Checkbox useSteamServiceCheckbox;
     private readonly Checkbox fastLoginCheckbox;
