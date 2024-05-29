@@ -6,7 +6,7 @@ namespace XIVLauncher.Core.Accounts.Secrets.Providers;
 public class KeychainSecretProvider : ISecretProvider
 {
     public const string PACKAGE = "cn.ottercorp.xivlaunchercn";
-    // public const string SERVICE = "SDOID";
+    public const string SERVICE = "SDOID_PW";
     public const string SERVICE_SESSION = "SDOID";
 
     public bool IsAvailable { get; private set; }
@@ -43,28 +43,26 @@ public class KeychainSecretProvider : ISecretProvider
 
     public string? GetPassword(string accountName)
     {
-        return "";
-        // try
-        // {
-        //     return Keyring.GetPassword(PACKAGE, SERVICE, accountName);
-        // }
-        // catch (KeyringException ex)
-        // {
-        //     if (ex.Type == ErrorType.NotFound)
-        //         return null;
-        //
-        //     throw;
-        // }
+        try
+        {
+            return Keyring.GetPassword(PACKAGE, SERVICE, accountName);
+        }
+        catch (KeyringException ex)
+        {
+            if (ex.Type == ErrorType.NotFound)
+                return null;
+        }
+        return null;
     }
 
     public void SavePassword(string accountName, string password)
     {
-        // Keyring.SetPassword(PACKAGE, SERVICE, accountName, password);
+        Keyring.SetPassword(PACKAGE, SERVICE, accountName, password);
     }
 
     public void DeletePassword(string accountName)
     {
-        // Keyring.DeletePassword(PACKAGE, SERVICE, accountName);
+        Keyring.DeletePassword(PACKAGE, SERVICE, accountName);
     }
 
     public string? GetAutoLoginSessionKey(string accountName)
@@ -77,9 +75,8 @@ public class KeychainSecretProvider : ISecretProvider
         {
             if (ex.Type == ErrorType.NotFound)
                 return null;
-
-            throw;
         }
+        return null;
     }
 
     public void SaveAutoLoginSessionKey(string accountName, string sessionKey)
