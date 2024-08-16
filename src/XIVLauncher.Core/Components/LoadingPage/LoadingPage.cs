@@ -21,7 +21,7 @@ public class LoadingPage : Page
 
     private Spinner spinner;
     private Button cancelButton = new("Cancel");
-    private Button disableAutoLoginButton = new("Disable auto login");
+    private Button disableAutoLoginButton = new("取消自动登录");
 
     private bool hasDisabledAutoLogin = false;
 
@@ -88,7 +88,7 @@ public class LoadingPage : Page
         }
         else if (this.hasDisabledAutoLogin)
         {
-            ImGuiHelpers.CenteredText("Auto login disabled on next start!");
+            ImGuiHelpers.CenteredText("已取消自动登录！");
         }
 
         ImGui.Dummy(new Vector2(20));

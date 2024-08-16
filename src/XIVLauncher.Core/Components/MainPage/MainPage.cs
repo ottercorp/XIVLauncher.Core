@@ -385,7 +385,7 @@ public class MainPage : Page
                 return false;
             }
 
-            App.ShowMessageBlocking("Game is successfully patched, you can login now.");
+            App.ShowMessageBlocking("游戏更新完毕，请重新登陆。");
             return false;
         }
 
@@ -393,7 +393,7 @@ public class MainPage : Page
         {
             App.ShowMessageBlocking(
                 Loc.Localize("LoginCancelled",
-                    "The login process is cancelled."));
+                    "登录过程被取消。"));
 
             return false;
         }
@@ -743,7 +743,7 @@ public class MainPage : Page
         {
             try
             {
-                App.StartLoading("Waiting for Dalamud to be ready...", "This may take a little while. Please hold!");
+                App.StartLoading("等待 Dalamud 准备就绪...", "这可能需要一点时间。请稍等！");
                 dalamudOk = dalamudLauncher.HoldForUpdate(App.Settings.GamePath) == DalamudLauncher.DalamudInstallState.Ok;
             }
             catch (DalamudRunnerException ex)
@@ -831,13 +831,13 @@ public class MainPage : Page
             if (App.Settings.WineStartupType == WineStartupType.Custom)
             {
                 if (App.Settings.WineBinaryPath == null)
-                    throw new Exception("Custom wine binary path wasn't set.");
+                    throw new Exception("未设置自定义 wine 二进制路径。");
                 else if (!Directory.Exists(App.Settings.WineBinaryPath))
-                    throw new Exception("Custom wine binary path is invalid: no such directory.\n" +
-                        "Check path carefully for typos: " + App.Settings.WineBinaryPath);
+                    throw new Exception("自定义 wine 二进制路径无效：没有这样的目录。\n" +
+                        "仔细检查路径是否有拼写错误： " + App.Settings.WineBinaryPath);
                 else if (!File.Exists(Path.Combine(App.Settings.WineBinaryPath, "wine64")))
-                    throw new Exception("Custom wine binary path is invalid: no wine64 found at that location.\n" +
-                        "Check path carefully for typos: " + App.Settings.WineBinaryPath);
+                    throw new Exception("自定义 wine 二进制路径无效：在该位置未找到 wine64。\n" +
+                        "仔细检查路径是否有拼写错误：" + App.Settings.WineBinaryPath);
             }
 
             var signal = new ManualResetEvent(false);
@@ -854,9 +854,9 @@ public class MainPage : Page
                 var gameFixApply = new GameFixApply(App.Settings.GamePath, App.Settings.GameConfigPath, Program.CompatibilityTools.Settings.Prefix, tempPath);
                 gameFixApply.UpdateProgress += (text, hasProgress, progress) =>
                 {
-                    App.LoadingPage.Line1 = "Applying game-specific fixes...";
+                    App.LoadingPage.Line1 = "正在应用游戏特定的修复...";
                     App.LoadingPage.Line2 = text;
-                    App.LoadingPage.Line3 = "This may take a little while. Please hold!";
+                    App.LoadingPage.Line3 = "这可能需要一点时间。请稍等！";
                     App.LoadingPage.IsIndeterminate = !hasProgress;
                     App.LoadingPage.Progress = progress;
                 };
@@ -872,14 +872,14 @@ public class MainPage : Page
                 signal.Set();
             });
 
-            App.StartLoading("Ensuring compatibility tool...", "This may take a little while. Please hold!");
+            App.StartLoading("正在安装兼容性工具...", "这可能需要一点时间。请稍等！");
             signal.WaitOne();
             signal.Dispose();
 
             if (isFailed)
                 return null;
 
-            App.StartLoading("Starting game...", "Have fun!");
+            App.StartLoading("正在开始游戏...", "玩得开心！");
 
             runner = new UnixGameRunner(Program.CompatibilityTools, dalamudLauncher, dalamudOk);
 
@@ -1089,7 +1089,7 @@ public class MainPage : Page
         {
             App.ShowMessageBlocking(
                 Loc.Localize("GameIsOpenError",
-                    "The game and/or the official launcher are open. XIVLauncher cannot patch the game if this is the case.\nPlease close the official launcher and try again."),
+                    "游戏和/或官方启动器已打开。如果是这种情况，XIVLauncher 无法修补游戏。\n请关闭官方启动器并重试。"),
                 "XIVLauncherCN");
 
             return false;
@@ -1115,7 +1115,7 @@ public class MainPage : Page
         });
         */
 
-        this.App.StartLoading($"Now patching {repository.ToString().ToLowerInvariant()}...", canCancel: false, isIndeterminate: false);
+        this.App.StartLoading($"正在更新 {repository.ToString().ToLowerInvariant()}...", canCancel: false, isIndeterminate: false);
 
         try
         {
@@ -1130,8 +1130,8 @@ public class MainPage : Page
                 {
                     Thread.Sleep(30);
 
-                    App.LoadingPage.Line2 = string.Format("Working on {0}/{1}", patcher.CurrentInstallIndex, patcher.Downloads.Count);
-                    App.LoadingPage.Line3 = string.Format("{0} left to download at {1}/s", ApiHelpers.BytesToString(patcher.AllDownloadsLength < 0 ? 0 : patcher.AllDownloadsLength),
+                    App.LoadingPage.Line2 = string.Format("正在处理 {0}/{1}", patcher.CurrentInstallIndex, patcher.Downloads.Count);
+                    App.LoadingPage.Line3 = string.Format("剩余 {0} (下载速度 {1}/s)", ApiHelpers.BytesToString(patcher.AllDownloadsLength < 0 ? 0 : patcher.AllDownloadsLength),
                         ApiHelpers.BytesToString(patcher.Speeds.Sum()));
 
                     App.LoadingPage.Progress = patcher.CurrentInstallIndex / (float)patcher.Downloads.Count;
@@ -1154,7 +1154,7 @@ public class MainPage : Page
         catch (PatchInstallerException ex)
         {
             var message = Loc.Localize("PatchManNoInstaller",
-                "The patch installer could not start correctly.\n{0}\n\nIf you have denied access to it, please try again. If this issue persists, please contact us via Discord.");
+                "补丁安装程序无法正确启动。\n{0}\n\n如果您拒绝了访问，请重试。如果此问题仍然存在，请通过QQ频道与我们联系。");
 
             App.ShowMessageBlocking(string.Format(message, ex.Message), "XIVLauncherCN Error");
         }
@@ -1166,7 +1166,7 @@ public class MainPage : Page
                     App.ShowMessageBlocking(
                         string.Format(
                             Loc.Localize("FreeSpaceError",
-                                "There is not enough space on your drive to download patches.\n\nYou can change the location patches are downloaded to in the settings.\n\nRequired:{0}\nFree:{1}"),
+                                "您的驱动器上没有足够的空间来下载所有补丁。\\n\\n您可以在 XIVLauncher 设置中更改补丁的下载位置。\\n\\n需要：{0}\\n剩余：{1}"),
                             ApiHelpers.BytesToString(sex.BytesRequired), ApiHelpers.BytesToString(sex.BytesFree)), "XIVLauncherCN Error");
                     break;
 
@@ -1174,7 +1174,7 @@ public class MainPage : Page
                     App.ShowMessageBlocking(
                         string.Format(
                             Loc.Localize("FreeSpaceErrorAll",
-                                "There is not enough space on your drive to download all patches.\n\nYou can change the location patches are downloaded to in the XIVLauncher settings.\n\nRequired:{0}\nFree:{1}"),
+                                "您的驱动器上没有足够的空间来下载所有补丁。\n\n您可以在 XIVLauncher 设置中更改补丁的下载位置。\n\n需要：{0}\n剩余：{1}"),
                             ApiHelpers.BytesToString(sex.BytesRequired), ApiHelpers.BytesToString(sex.BytesFree)), "XIVLauncherCN Error");
                     break;
 
@@ -1182,7 +1182,7 @@ public class MainPage : Page
                     App.ShowMessageBlocking(
                         string.Format(
                             Loc.Localize("FreeSpaceGameError",
-                                "There is not enough space on your drive to install patches.\n\nYou can change the location the game is installed to in the settings.\n\nRequired:{0}\nFree:{1}"),
+                                "您的驱动器上没有足够的空间来安装补丁。\n\n您可以在设置中更改游戏的安装位置。\n\n需要：{0}\\n剩余：{1}"),
                             ApiHelpers.BytesToString(sex.BytesRequired), ApiHelpers.BytesToString(sex.BytesFree)), "XIVLauncherCN Error");
                     break;
 
@@ -1207,15 +1207,15 @@ public class MainPage : Page
     private void PatcherOnFail(PatchManager.FailReason reason, string versionId)
     {
         var dlFailureLoc = Loc.Localize("PatchManDlFailure",
-            "XIVLauncher could not verify the downloaded game files. Please restart and try again.\n\nThis usually indicates a problem with your internet connection.\nIf this error persists, try using a VPN set to Japan.\n\nContext: {0}\n{1}");
+            "XIVLauncher 无法验证已下载的游戏文件。请重新启动并重试。\n\n这通常表示您的互联网连接存在问题。\n如果此错误仍然存在，请尝试使用设置为中国的 VPN。\n\n\nContext: {0}\n{1}");
 
         var sdoPatchMissingFailureLoc = Loc.Localize("SdoPatchMissing",
-            "游戏补丁列表的早期补丁被删除，导致无法通过补丁安装游戏，请手动安装游戏客户端并设置包含 game 文件夹的游戏路径。\nContext: {0}\n{1}");
+            "游戏补丁列表的早期补丁被删除，无法通过补丁安装完整游戏，请手动安装游戏客户端并在设置中设定包含 game 文件夹的游戏路径。\nContext: {0}\n{1}");
 
         switch (reason)
         {
             case PatchManager.FailReason.DownloadProblem:
-                var errorMsg = (versionId == "2014.03.24.0001.000") ? sdoPatchMissingFailureLoc : dlFailureLoc;
+                var errorMsg = (versionId.StartsWith("2014.03.24")) ? sdoPatchMissingFailureLoc : dlFailureLoc;
                 App.ShowMessageBlocking(string.Format(errorMsg, "Problem", versionId), "XIVLauncherCN Error");
                 break;
 
@@ -1233,7 +1233,7 @@ public class MainPage : Page
     private void InstallerOnFail()
     {
         App.ShowMessageBlocking(
-            Loc.Localize("PatchInstallerInstallFailed", "The patch installer ran into an error.\nPlease report this error.\n\nPlease try again or use the official launcher."),
+            Loc.Localize("PatchInstallerInstallFailed", "补丁安装程序遇到错误。\n请报告此错误。\n\n请重试或使用官方启动器。"),
             "XIVLauncherCN Error");
 
         Environment.Exit(0);
