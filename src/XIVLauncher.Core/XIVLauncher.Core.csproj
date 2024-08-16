@@ -109,6 +109,21 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(IsOSX)'=='true'">
+    <Resource Remove="cimgui.dylib" />
+    <Content Include="Resources/cimgui.dylib">
+      <Link>cimgui.dylib</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsOSX)'=='true'">
+    <Resource Remove="Resources/ffxiv_dx11.dxvk-cache-base" />
+    <Content Include="Resources/ffxiv_dx11.dxvk-cache-base">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <!-- Git -->
   <Target Name="GetGitHash" BeforeTargets="WriteGitHash" Condition="'$(BuildHash)' == ''">
     <PropertyGroup>
