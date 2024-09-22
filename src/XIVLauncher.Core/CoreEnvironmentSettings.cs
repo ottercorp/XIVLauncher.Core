@@ -1,6 +1,4 @@
-using System;
 using System.Diagnostics;
-using System.Globalization;
 
 namespace XIVLauncher.Core;
 
@@ -17,6 +15,8 @@ public static class CoreEnvironmentSettings
     public static bool ClearLogs => CheckEnvBool("XL_CLEAR_LOGS");
     public static bool ClearAll => CheckEnvBool("XL_CLEAR_ALL");
     public static bool? UseSteam => CheckEnvBoolOrNull("XL_USE_STEAM"); // Fix for Steam Deck users who lock themselves out
+    public static bool IsSteamCompatTool => CheckEnvBool("XL_SCT");
+    public static uint AltAppID => GetAltAppId(System.Environment.GetEnvironmentVariable("XL_APPID"));
 
     private static bool CheckEnvBool(string key)
     {
@@ -36,8 +36,16 @@ public static class CoreEnvironmentSettings
     public static string GetCleanEnvironmentVariable(string envvar, string badstring = "", string separator = ":")
     {
         string dirty = Environment.GetEnvironmentVariable(envvar) ?? "";
-        if (badstring.Equals("")) return dirty;
+        if (badstring.Equals("", StringComparison.Ordinal)) return dirty;
         return string.Join(separator, Array.FindAll<string>(dirty.Split(separator, StringSplitOptions.RemoveEmptyEntries), s => !s.Contains(badstring)));
+    }
+
+    public static uint GetAltAppId(string? appid)
+    {
+        uint.TryParse(appid, out var result);
+        
+        // Will return 0 if appid is invalid (or zero).
+        return result;
     }
 
     public static string GetCType()
@@ -52,6 +60,6 @@ public static class CoreEnvironmentSettings
         proc.StartInfo = psi;
         proc.Start();
         var output = proc.StandardOutput.ReadToEnd().Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        return Array.Find(output, s => s.ToUpper().StartsWith("C."));
+        return Array.Find(output, s => s.ToUpper().StartsWith("C.")) ?? string.Empty;
     }
 }

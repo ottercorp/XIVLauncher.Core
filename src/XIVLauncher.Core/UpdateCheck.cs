@@ -11,10 +11,7 @@ public static class UpdateCheck
     {
         try
         {
-            using var client = new HttpClient();
-            client.Timeout = TimeSpan.FromSeconds(5);
-
-            var response = await client.GetStringAsync(UPDATE_URL).ConfigureAwait(false);
+            var response = await Program.HttpClient.GetStringAsync(UPDATE_URL).ConfigureAwait(false);
             var remoteVersion = Version.Parse(response);
 
             var localVersion = Version.Parse(AppUtil.GetAssemblyVersion());

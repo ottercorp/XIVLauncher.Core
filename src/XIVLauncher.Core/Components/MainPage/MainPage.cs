@@ -1,23 +1,27 @@
-﻿using System.Diagnostics;
-using ImGuiNET;
+using System.Diagnostics;
 using System.Numerics;
+
 using CheapLoc;
+
+using ImGuiNET;
+
 using Serilog;
+
 using XIVLauncher.Common;
 using XIVLauncher.Common.Addon;
 using XIVLauncher.Common.Dalamud;
 using XIVLauncher.Common.Game;
+using XIVLauncher.Common.Game.Exceptions;
 using XIVLauncher.Common.Game.Patch;
 using XIVLauncher.Common.Game.Patch.Acquisition;
 using XIVLauncher.Common.Game.Patch.PatchList;
 using XIVLauncher.Common.PlatformAbstractions;
-using XIVLauncher.Common.Windows;
 using XIVLauncher.Common.Unix;
 using XIVLauncher.Common.Unix.Compatibility;
 using XIVLauncher.Common.Unix.Compatibility.GameFixes;
 using XIVLauncher.Common.Util;
+using XIVLauncher.Common.Windows;
 using XIVLauncher.Core.Accounts;
-using XIVLauncher.Common.Game.Exceptions;
 using XIVLauncher.Core.Support;
 
 namespace XIVLauncher.Core.Components.MainPage;
@@ -215,26 +219,25 @@ public class MainPage : Page
 
     private async Task<Launcher.LoginResult> TryLoginToGame(string username, string password, string otp, bool isSteam, LoginAction action)
     {
-        bool? gateStatus = null;
+        // #if !DEBUG
+        //         bool? gateStatus = null;
+        //         try
+        //         {
+        //             // TODO: Also apply the login status fix here
+        //             var gate = await App.Launcher.GetGateStatus(App.Settings.ClientLanguage ?? ClientLanguage.English).ConfigureAwait(false);
+        //             gateStatus = gate.Status;
+        //         }
+        //         catch (Exception ex)
+        //         {
+        //             Log.Error(ex, "Could not obtain gate status");
+        //         }
 
-// #if !DEBUG
-//         // try
-//         // {
-//         //     // TODO: Also apply the login status fix here
-//         //     var gate = await App.Launcher.GetGateStatus(App.Settings.ClientLanguage ?? ClientLanguage.English).ConfigureAwait(false);
-//         //     gateStatus = gate.Status;
-//         // }
-//         // catch (Exception ex)
-//         // {
-//         //     Log.Error(ex, "Could not obtain gate status");
-//         // }
-
-//         // if (gateStatus == null)
-//         // {
-//         //     App.ShowMessageBlocking("Login servers could not be reached or maintenance is in progress. This might be a problem with your connection.");
-//         //     return null;
-//         // }
-// #endif
+        //         if (gateStatus == null)
+        //         {
+        //             App.ShowMessageBlocking("Login servers could not be reached or maintenance is in progress. This might be a problem with your connection.");
+        //             return null!;
+        //         }
+        // #endif
 
         try
         {
@@ -244,7 +247,7 @@ public class MainPage : Page
                 throw new Exception("Area is not selected");
             }
             var enableUidCache = App.Settings.IsUidCacheEnabled ?? false;
-            var gamePath = App.Settings.GamePath;
+            var gamePath = App.Settings.GamePath!;
             var checkResult = await App.Launcher.CheckGameUpdate(Area, gamePath, false);
             if (checkResult.State == Launcher.LoginState.NeedsPatchGame)
                 return checkResult;
@@ -298,18 +301,18 @@ public class MainPage : Page
 
     private async Task<bool> TryProcessLoginResult(Launcher.LoginResult loginResult, bool isSteam, LoginAction action)
     {
+        // Format error message in the way OauthLoginException expects.
+        var preErrorMsg = "window.external.user(\"login=auth,ng,err,";
+        var postErrorMsg = "\");";
+
         if (loginResult.State == Launcher.LoginState.NoService)
         {
-            throw new Exception("No service account or subscription");
-
-            return false;
+            throw new OauthLoginException(preErrorMsg + "No service account or subscription" + postErrorMsg);
         }
 
         if (loginResult.State == Launcher.LoginState.NoTerms)
         {
-            throw new Exception("Need to accept terms of use");
-
-            return false;
+            throw new OauthLoginException(preErrorMsg + "Need to accept terms of use" + postErrorMsg);
         }
 
         /*
@@ -333,9 +336,7 @@ public class MainPage : Page
                 "Error", MessageBoxButton.OK, MessageBoxImage.Error, parentWindow: _window);
                 */
 
-            throw new Exception("Boot conflict, need reinstall");
-
-            return false;
+            throw new OauthLoginException(preErrorMsg + "Boot conflict, need reinstall" + postErrorMsg);
         }
 
         if (action == LoginAction.Repair)
@@ -358,12 +359,10 @@ public class MainPage : Page
                             "The server sent an incorrect response - the repair cannot proceed."),
                         "Error", MessageBoxButton.OK, MessageBoxImage.Error, parentWindow: _window);
                         */
-                    throw new Exception("Repair login state not NeedsPatchGame");
-
-                    return false;
+                    throw new OauthLoginException(preErrorMsg + "Repair login state not NeedsPatchGame" + postErrorMsg);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 /*
                  * We should never reach here.
@@ -372,8 +371,6 @@ public class MainPage : Page
                  */
                 //CustomMessageBox.Builder.NewFrom(ex, "TryProcessLoginResult/Repair").WithParentWindow(_window).Show();
                 throw;
-
-                return false;
             }
         }
 
@@ -406,30 +403,30 @@ public class MainPage : Page
 
             return false;
         }
-        
-// #if !DEBUG
-//         bool? gateStatus = null;
-//         try
-//         {
-//             // TODO: Also apply the login status fix here
-//             var gate = await App.Launcher.GetGateStatus(App.Settings.ClientLanguage ?? ClientLanguage.English).ConfigureAwait(false);
-//             gateStatus = gate.Status;
-//         }
-//         catch (Exception ex)
-//         {
-//             Log.Error(ex, "Could not obtain gate status");
-//         }
 
-//         switch (gateStatus)
-//         {
-//             case null:
-//                 App.ShowMessageBlocking("Login servers could not be reached or maintenance is in progress. This might be a problem with your connection.");
-//                 return false;
-//             case false:
-//                 App.ShowMessageBlocking("Maintenance is in progress.");
-//                 return false;
-//         }
-// #endif
+
+        // #if !DEBUG
+        //         bool? gateStatus = null;
+        //         try
+        //         {
+        //             // TODO: Also apply the login status fix here
+        //             var gate = await App.Launcher.GetGateStatus(App.Settings.ClientLanguage ?? ClientLanguage.English).ConfigureAwait(false);
+        //             gateStatus = gate.Status;
+        //         }
+        //         catch (Exception ex)
+        //         {
+        //             Log.Error(ex, "Could not obtain gate status");
+        //         }
+        //         switch (gateStatus)
+        //         {
+        //             case null:
+        //                 App.ShowMessageBlocking("Login servers could not be reached or maintenance is in progress. This might be a problem with your connection.");
+        //                 return false;
+        //             case false:
+        //                 App.ShowMessageBlocking("Maintenance is in progress.");
+        //                 return false;
+        //         }
+        // #endif
 
         Debug.Assert(loginResult.State == Launcher.LoginState.Ok);
 
@@ -450,11 +447,11 @@ public class MainPage : Page
                 using var process = await StartGameAndAddon(loginResult, isSteam, action == LoginAction.GameNoDalamud, action == LoginAction.GameNoThirdparty).ConfigureAwait(false);
 
                 if (process is null)
-                    throw new Exception("Could not obtain Process Handle");
+                    throw new InvalidOperationException("Could not obtain Process Handle");
 
                 if (process.ExitCode != 0 && (App.Settings.TreatNonZeroExitCodeAsFailure ?? false))
                 {
-                    throw new Exception("Game exited with non-zero exit code");
+                    throw new InvalidOperationException("Game exited with non-zero exit code");
 
                     /*
                     switch (new CustomMessageBox.Builder()
@@ -739,7 +736,7 @@ public class MainPage : Page
                 */
         }
 
-        if (App.Settings.DalamudEnabled.GetValueOrDefault(true) && !forceNoDalamud && App.Settings.IsDx11.GetValueOrDefault(true))
+        if (App.Settings.DalamudEnabled.GetValueOrDefault(true) && !forceNoDalamud)
         {
             try
             {
@@ -768,22 +765,33 @@ public class MainPage : Page
 
         IGameRunner runner;
 
+        // Set LD_PRELOAD to value of XL_PRELOAD if we're running as a steam compatibility tool.
+        // This check must be done before the FixLDP check so that it will still work.
+        if (CoreEnvironmentSettings.IsSteamCompatTool)
+        {
+            var ldpreload = System.Environment.GetEnvironmentVariable("LD_PRELOAD") ?? "";
+            var xlpreload = System.Environment.GetEnvironmentVariable("XL_PRELOAD") ?? "";
+            ldpreload = (ldpreload + ":" + xlpreload).Trim(':');
+            if (!string.IsNullOrEmpty(ldpreload))
+                System.Environment.SetEnvironmentVariable("LD_PRELOAD", ldpreload);
+        }
+
         // Hack: Force C.utf8 to fix incorrect unicode paths
-        if (App.Settings.FixLocale.Value && !string.IsNullOrEmpty(Program.CType))
+        if (App.Settings.FixLocale == true && !string.IsNullOrEmpty(Program.CType))
         {
             System.Environment.SetEnvironmentVariable("LC_ALL", Program.CType);
             System.Environment.SetEnvironmentVariable("LC_CTYPE", Program.CType);
         }
-        
+
         // Hack: Strip out gameoverlayrenderer.so entries from LD_PRELOAD
-        if (App.Settings.FixLDP.Value)
+        if (App.Settings.FixLDP == true)
         {
             var ldpreload = CoreEnvironmentSettings.GetCleanEnvironmentVariable("LD_PRELOAD", "gameoverlayrenderer.so");
             System.Environment.SetEnvironmentVariable("LD_PRELOAD", ldpreload);
         }
 
         // Hack: XMODIFIERS=@im=null
-        if (App.Settings.FixIM.Value)
+        if (App.Settings.FixIM == true)
         {
             System.Environment.SetEnvironmentVariable("XMODIFIERS", "@im=null");
         }
@@ -831,12 +839,12 @@ public class MainPage : Page
             if (App.Settings.WineStartupType == WineStartupType.Custom)
             {
                 if (App.Settings.WineBinaryPath == null)
-                    throw new Exception("未设置自定义 wine 二进制路径。");
+                    throw new InvalidOperationException("未设置自定义 wine 二进制路径。");
                 else if (!Directory.Exists(App.Settings.WineBinaryPath))
-                    throw new Exception("自定义 wine 二进制路径无效：没有这样的目录。\n" +
+                    throw new InvalidOperationException("自定义 wine 二进制路径无效：没有这样的目录。\n" +
                         "仔细检查路径是否有拼写错误： " + App.Settings.WineBinaryPath);
                 else if (!File.Exists(Path.Combine(App.Settings.WineBinaryPath, "wine64")))
-                    throw new Exception("自定义 wine 二进制路径无效：在该位置未找到 wine64。\n" +
+                    throw new InvalidOperationException("自定义 wine 二进制路径无效：在该位置未找到 wine64。\n" +
                         "仔细检查路径是否有拼写错误：" + App.Settings.WineBinaryPath);
             }
 
@@ -877,7 +885,7 @@ public class MainPage : Page
             signal.Dispose();
 
             if (isFailed)
-                return null;
+                return null!;
 
             App.StartLoading("正在开始游戏...", "玩得开心！");
 
@@ -885,7 +893,7 @@ public class MainPage : Page
 
             // SE has its own way of encoding spaces when encrypting arguments, which interferes 
             // with quoting, but they are necessary when passing paths unencrypted
-            var userPath = Program.CompatibilityTools.UnixToWinePath(App.Settings.GameConfigPath.FullName);
+            var userPath = Program.CompatibilityTools.UnixToWinePath(App.Settings.GameConfigPath!.FullName);
             if (App.Settings.IsEncryptArgs.GetValueOrDefault(true))
                 gameArgs += $" UserPath={userPath}";
             else
@@ -939,7 +947,7 @@ public class MainPage : Page
         {
             Log.Information("GameProcess was null...");
             IsLoggingIn = false;
-            return null;
+            return null!;
         }
 
         var addonMgr = new AddonManager();
@@ -952,7 +960,7 @@ public class MainPage : Page
 
             addonMgr.RunAddons(launchedProcess.Id, addons);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             /*
             CustomMessageBox.Builder
@@ -981,7 +989,7 @@ public class MainPage : Page
 
         try
         {
-            if (App.Steam?.IsValid ?? false)
+            if (App.Steam?.IsValid == true)
             {
                 App.Steam.Shutdown();
             }
@@ -996,7 +1004,7 @@ public class MainPage : Page
 
     private void PersistAccount(string username, string password, bool isOtp, bool isSteam)
     {
-        if (App.Accounts.CurrentAccount != null && App.Accounts.CurrentAccount.UserName.Equals(username) &&
+        if (App.Accounts.CurrentAccount != null && App.Accounts.CurrentAccount.UserName.Equals(username, StringComparison.Ordinal) &&
             App.Accounts.CurrentAccount.Password != password &&
             App.Accounts.CurrentAccount.SavePassword)
             App.Accounts.UpdatePassword(App.Accounts.CurrentAccount, password);
@@ -1029,11 +1037,11 @@ public class MainPage : Page
 
             App.Settings.PatchPath ??= new DirectoryInfo(Path.Combine(Paths.RoamingPath, "patches"));
 
-            PatchListEntry[] bootPatches = null;
+            PatchListEntry[] bootPatches;
 
             try
             {
-                bootPatches = await App.Launcher.CheckBootVersion(App.Settings.GamePath).ConfigureAwait(false);
+                bootPatches = await App.Launcher.CheckBootVersion(App.Settings.GamePath!).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -1046,10 +1054,10 @@ public class MainPage : Page
                 return false;
             }
 
-            if (bootPatches == null)
+            if (bootPatches.Length == 0)
                 return true;
 
-            return await TryHandlePatchAsync(Repository.Boot, bootPatches, null).ConfigureAwait(false);
+            return await TryHandlePatchAsync(Repository.Boot, bootPatches, "").ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -1146,7 +1154,7 @@ public class MainPage : Page
             finally
             {
                 token.Cancel();
-                statusThread.Join(3000);
+                statusThread.Join(TimeSpan.FromMilliseconds(1000));
             }
 
             return true;
@@ -1204,7 +1212,7 @@ public class MainPage : Page
         return false;
     }
 
-    private void PatcherOnFail(PatchManager.FailReason reason, string versionId)
+    private void PatcherOnFail(PatchListEntry patch, string context)
     {
         var dlFailureLoc = Loc.Localize("PatchManDlFailure",
             "XIVLauncher 无法验证已下载的游戏文件。请重新启动并重试。\n\n这通常表示您的互联网连接存在问题。\n如果此错误仍然存在，请尝试使用设置为中国的 VPN。\n\n\nContext: {0}\n{1}");
@@ -1263,7 +1271,7 @@ public class MainPage : Page
         Log.Information("STARTING REPAIR");
 
         // TODO: bundle the PatchInstaller with xl-core on Windows and run this remotely
-        using var verify = new PatchVerifier(Program.CommonSettings, loginResult, 20, loginResult.OauthLogin.MaxExpansion, false);
+        using var verify = new PatchVerifier(Program.CommonSettings, loginResult, TimeSpan.FromMilliseconds(100), loginResult.OauthLogin.MaxExpansion, false);
 
         for (bool doVerify = true; doVerify;)
         {
@@ -1310,11 +1318,11 @@ public class MainPage : Page
                 case PatchVerifier.VerifyState.Done:
                     // TODO: ask the user if they want to login or rerun after repair
                     App.ShowMessageBlocking(verify.NumBrokenFiles switch
-                        {
-                            0 => Loc.Localize("GameRepairSuccess0", "All game files seem to be valid."),
-                            1 => Loc.Localize("GameRepairSuccess1", "XIVLauncher has successfully repaired 1 game file."),
-                            _ => string.Format(Loc.Localize("GameRepairSuccessPlural", "XIVLauncher has successfully repaired {0} game files."), verify.NumBrokenFiles),
-                        });
+                    {
+                        0 => Loc.Localize("GameRepairSuccess0", "All game files seem to be valid."),
+                        1 => Loc.Localize("GameRepairSuccess1", "XIVLauncher has successfully repaired 1 game file."),
+                        _ => string.Format(Loc.Localize("GameRepairSuccessPlural", "XIVLauncher has successfully repaired {0} game files."), verify.NumBrokenFiles),
+                    });
 
                     doVerify = false;
                     break;

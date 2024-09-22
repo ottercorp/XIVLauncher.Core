@@ -1,4 +1,5 @@
 using System.Reflection;
+
 using XIVLauncher.Common.Util;
 
 namespace XIVLauncher.Core;
@@ -50,6 +51,13 @@ public static partial class AppUtil
         return fvi.FileVersion.ToString();
     }
 
+    /// <summary>
+    ///     Open a URL in the system's default browser.
+    /// </summary>
+    /// <remarks>
+    ///     On Steam Deck this method will open the in-game overlay instead of a browser instance.
+    /// </remarks>
+    /// <param name="url">The URL to open.</param>
     public static void OpenBrowser(string url)
     {
         if (Program.IsSteamDeckHardware && Program.Steam != null && Program.Steam.IsValid)
@@ -60,12 +68,5 @@ public static partial class AppUtil
         {
             PlatformHelpers.OpenBrowser(url);
         }
-    }
-
-    public static void AddEnvironmentPaths(IEnumerable<string> paths)
-    {
-        var path = new[] { Environment.GetEnvironmentVariable("PATH") ?? string.Empty };
-        string newPath = string.Join(Path.PathSeparator.ToString(), path.Concat(paths));
-        Environment.SetEnvironmentVariable("PATH", newPath);
     }
 }

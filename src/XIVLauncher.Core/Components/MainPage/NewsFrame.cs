@@ -1,5 +1,7 @@
-﻿using ImGuiNET;
 using System.Numerics;
+
+using ImGuiNET;
+
 using XIVLauncher.Common;
 using XIVLauncher.Common.Game;
 
@@ -13,9 +15,9 @@ public class NewsFrame : Component
     private readonly Timer bannerTimer;
 
     private Headlines? headlines;
-    private TextureWrap[]? banners;
+    private TextureWrap[] banners = { };
 
-    private IReadOnlyList<Banner>? bannerList;
+    private IReadOnlyList<Banner> bannerList = new List<Banner>();
 
     private int currentBanner = 0;
 
@@ -46,21 +48,20 @@ public class NewsFrame : Component
             this.newsLoaded = false;
 
             // await Headlines.GetWorlds(this.app.Launcher, this.app.Settings.ClientLanguage ?? ClientLanguage.English);
-            
+
             // bannerList = await Headlines.GetBanners(this.app.Launcher, this.app.Settings.ClientLanguage ?? ClientLanguage.English).ConfigureAwait(false);
-                       
+
             // await Headlines.GetMessage(this.app.Launcher, this.app.Settings.ClientLanguage ?? ClientLanguage.English);
 
             headlines = await Headlines.GetNews(this.app.Launcher, this.app.Settings.ClientLanguage ?? ClientLanguage.English).ConfigureAwait(false);
             bannerList = headlines.Banner;
-            
+
             this.banners = new TextureWrap[bannerList.Count];
 
-            var client = new HttpClient();
 
             for (var i = 0; i < bannerList.Count; i++)
             {
-                var textureBytes = await client.GetByteArrayAsync(this.bannerList[i].LsbBanner).ConfigureAwait(false);
+                var textureBytes = await Program.HttpClient.GetByteArrayAsync(this.bannerList[i].LsbBanner).ConfigureAwait(false);
                 this.banners[i] = TextureWrap.Load(textureBytes);
             }
 
@@ -95,7 +96,7 @@ public class NewsFrame : Component
 
                 void ShowNewsEntry(News newsEntry)
                 {
-                    ImGui.Text(newsEntry.Title);
+                    ImGui.TextUnformatted(newsEntry.Title);
 
                     if (ImGui.IsItemClicked(ImGuiMouseButton.Left) && !string.IsNullOrEmpty(newsEntry.Url))
                     {
@@ -103,19 +104,23 @@ public class NewsFrame : Component
                     }
                 }
 
-                ImGui.TextDisabled("News");
-                foreach (News newsEntry in this.headlines.News)
+                if (this.headlines is not null)
                 {
-                    ShowNewsEntry(newsEntry);
+                    ImGui.TextDisabled("News");
+
+                    foreach (News newsEntry in this.headlines.News)
+                    {
+                        ShowNewsEntry(newsEntry);
+                    }
+
+                    // ImGui.Spacing();
+
+                    // ImGui.TextDisabled("Topics");
+                    // foreach (News topic in this.headlines.Topics)
+                    // {
+                    //     ShowNewsEntry(topic);
+                    // }
                 }
-
-                // ImGui.Spacing();
-
-                // ImGui.TextDisabled("Topics");
-                // foreach (News topic in this.headlines.Topics)
-                // {
-                //     ShowNewsEntry(topic);
-                // }
             }
             else
             {

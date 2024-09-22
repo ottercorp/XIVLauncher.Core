@@ -1,52 +1,60 @@
-﻿using System.Numerics;
-using System.IO;
+using System.Numerics;
+
 using CheapLoc;
+
 using Config.Net;
+
 using ImGuiNET;
-using XIVLauncher.Core.Style;
+
 using Serilog;
+
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
+
 using XIVLauncher.Common;
 using XIVLauncher.Common.Dalamud;
 using XIVLauncher.Common.Game.Patch.Acquisition;
 using XIVLauncher.Common.PlatformAbstractions;
 using XIVLauncher.Common.Support;
-using XIVLauncher.Common.Windows;
 using XIVLauncher.Common.Unix;
 using XIVLauncher.Common.Unix.Compatibility;
 using XIVLauncher.Common.Util;
+using XIVLauncher.Common.Windows;
 using XIVLauncher.Core.Accounts.Secrets;
 using XIVLauncher.Core.Accounts.Secrets.Providers;
 using XIVLauncher.Core.Components.LoadingPage;
 using XIVLauncher.Core.Configuration;
 using XIVLauncher.Core.Configuration.Parsers;
+using XIVLauncher.Core.Style;
 
 namespace XIVLauncher.Core;
 
-class Program
+sealed class Program
 {
-    private static Sdl2Window window;
-    private static CommandList cl;
-    private static GraphicsDevice gd;
-    private static ImGuiBindings bindings;
+    private static Sdl2Window window = null!;
+    private static CommandList cl = null!;
+    private static GraphicsDevice gd = null!;
+    private static ImGuiBindings bindings = null!;
 
     public static GraphicsDevice GraphicsDevice => gd;
     public static ImGuiBindings ImGuiBindings => bindings;
-    public static ILauncherConfig Config { get; private set; }
+    public static ILauncherConfig Config { get; private set; } = null!;
     public static CommonSettings CommonSettings => new(Config);
     public static ISteam? Steam { get; private set; }
-    public static DalamudUpdater DalamudUpdater { get; private set; }
-    public static DalamudOverlayInfoProxy DalamudLoadInfo { get; private set; }
-    public static CompatibilityTools CompatibilityTools { get; private set; }
-    public static ISecretProvider Secrets { get; private set; }
+    public static DalamudUpdater DalamudUpdater { get; private set; } = null!;
+    public static DalamudOverlayInfoProxy DalamudLoadInfo { get; private set; } = null!;
+    public static CompatibilityTools CompatibilityTools { get; private set; } = null!;
+    public static ISecretProvider Secrets { get; private set; } = null!;
+    public static HttpClient HttpClient { get; private set; } = new()
+    {
+        Timeout = TimeSpan.FromSeconds(5)
+    };
 
-    private static readonly Vector3 clearColor = new(0.1f, 0.1f, 0.1f);
-    private static bool showImGuiDemoWindow = true;
+    private static readonly Vector3 ClearColor = new(0.1f, 0.1f, 0.1f);
 
-    private static LauncherApp launcherApp;
-    public static Storage storage;
+    private static LauncherApp launcherApp = null!;
+    public static Storage storage = null!;
     public static DirectoryInfo DotnetRuntime => storage.GetFolder("runtime");
 
     // TODO: We don't have the steamworks api for this yet.
@@ -59,12 +67,11 @@ class Program
 
     private const string APP_NAME = "xlcore_cn";
 
-    private static string[] mainargs;
+    private static string[] mainArgs = { };
 
     private static uint invalidationFrames = 0;
-    private static Vector2 lastMousePosition;
+    private static Vector2 lastMousePosition = Vector2.Zero;
 
-    private const string FRONTIER_FALLBACK = "https://launcher.finalfantasyxiv.com/v650/index.html?rc_lang={0}&time={1}";
 
     public static string CType = CoreEnvironmentSettings.GetCType();
 
@@ -104,7 +111,6 @@ class Program
         Config.DoVersionCheck ??= true;
         Config.FontPxSize ??= 22.0f;
 
-        Config.IsDx11 ??= true;
         Config.IsEncryptArgs ??= true;
         Config.IsFt ??= false;
         Config.IsOtpServer ??= false;
@@ -114,7 +120,7 @@ class Program
         Config.PatchAcquisitionMethod ??= AcquisitionMethod.Aria;
 
         Config.DalamudEnabled ??= true;
-        Config.DalamudLoadMethod = !OperatingSystem.IsWindows() ? DalamudLoadMethod.DllInject : DalamudLoadMethod.EntryPoint;
+        Config.DalamudLoadMethod ??= DalamudLoadMethod.EntryPoint;
 
         Config.GlobalScale ??= 1.0f;
 
@@ -136,9 +142,40 @@ class Program
     public const uint STEAM_APP_ID = 39210;
     public const uint STEAM_APP_ID_FT = 312060;
 
+    /// <summary>
+    ///     The name of the Dalamud injector executable file.
+    /// </summary>
+    // TODO: move this somewhere better.
+    public const string DALAMUD_INJECTOR_NAME = "Dalamud.Injector.exe";
+
+    /// <summary>
+    ///     Creates a new instance of the Dalamud updater.
+    /// </summary>
+    /// <remarks>
+    ///     If <see cref="ILauncherConfig.DalamudManualInjectionEnabled"/> is true and there is an injector at <see cref="ILauncherConfig.DalamudManualInjectPath"/> then
+    ///     manual injection will be used instead of a Dalamud branch.
+    /// </remarks>
+    /// <returns>A <see cref="DalamudUpdater"/> instance.</returns>
+    private static DalamudUpdater CreateDalamudUpdater()
+    {
+        FileInfo runnerOverride = null;
+        if (Config.DalamudManualInjectPath is not null &&
+            Config.DalamudManualInjectionEnabled == true &&
+            Config.DalamudManualInjectPath.Exists &&
+            Config.DalamudManualInjectPath.GetFiles().FirstOrDefault(x => x.Name == DALAMUD_INJECTOR_NAME) is not null)
+        {
+            runnerOverride = new FileInfo(Path.Combine(Config.DalamudManualInjectPath.FullName, DALAMUD_INJECTOR_NAME));
+        }
+        return new DalamudUpdater(storage.GetFolder("dalamud"), storage.GetFolder("runtime"), storage.GetFolder("dalamudAssets"), storage.Root, null, null)
+        {
+            Overlay = DalamudLoadInfo,
+            RunnerOverride = runnerOverride
+        };
+    }
+
     private static void Main(string[] args)
     {
-        mainargs = args;
+        mainArgs = args;
         storage = new Storage(APP_NAME);
 
         if (CoreEnvironmentSettings.ClearAll)
@@ -154,7 +191,7 @@ class Program
             if (CoreEnvironmentSettings.ClearLogs) ClearLogs();
         }
 
-        SetupLogging(mainargs);
+        SetupLogging(mainArgs);
         LoadConfig(storage);
 
         Secrets = GetSecretProvider(storage);
@@ -163,7 +200,15 @@ class Program
 
         uint appId, altId;
         string appName, altName;
-        if (Config.IsFt.Value)
+        // AppId of 0 is invalid (though still a valid uint)
+        if (CoreEnvironmentSettings.AltAppID > 0)
+        {
+            appId = CoreEnvironmentSettings.AltAppID;
+            altId = STEAM_APP_ID_FT;
+            appName = $"Override AppId={appId.ToString()}";
+            altName = "FFXIV Free Trial";
+        }
+        else if (Config.IsFt == true)
         {
             appId = STEAM_APP_ID_FT;
             altId = STEAM_APP_ID;
@@ -192,7 +237,7 @@ class Program
                 default:
                     throw new PlatformNotSupportedException();
             }
-            if (!Config.IsIgnoringSteam ?? true)
+            if (Config.IsIgnoringSteam != true || CoreEnvironmentSettings.IsSteamCompatTool)
             {
                 try
                 {
@@ -210,11 +255,9 @@ class Program
             Log.Error(ex, "Steam couldn't load");
         }
 
+        // Manual or auto injection setup.
         DalamudLoadInfo = new DalamudOverlayInfoProxy();
-        DalamudUpdater = new DalamudUpdater(storage.GetFolder("dalamud"), storage.GetFolder("runtime"), storage.GetFolder("dalamudAssets"), storage.Root, null, null)
-        {
-            Overlay = DalamudLoadInfo
-        };
+        DalamudUpdater = CreateDalamudUpdater();
         DalamudUpdater.Run();
 
         CreateCompatToolsInstance();
@@ -263,7 +306,8 @@ class Program
 
         needUpdate = CoreEnvironmentSettings.IsUpgrade ? true : needUpdate;
 
-        launcherApp = new LauncherApp(storage, needUpdate, FRONTIER_FALLBACK);
+        var launcherClientConfig = LauncherClientConfig.GetAsync().GetAwaiter().GetResult();
+        launcherApp = new LauncherApp(storage, needUpdate, launcherClientConfig.frontierUrl, launcherClientConfig.cutOffBootver);
 
         Invalidate(20);
 
@@ -306,13 +350,14 @@ class Program
 
             cl.Begin();
             cl.SetFramebuffer(gd.MainSwapchain.Framebuffer);
-            cl.ClearColorTarget(0, new RgbaFloat(clearColor.X, clearColor.Y, clearColor.Z, 1f));
+            cl.ClearColorTarget(0, new RgbaFloat(ClearColor.X, ClearColor.Y, ClearColor.Z, 1f));
             bindings.Render(gd, cl);
             cl.End();
             gd.SubmitCommands(cl);
             gd.SwapBuffers(gd.MainSwapchain);
         }
 
+        HttpClient.Dispose();
         // Clean up Veldrid resources
         gd.WaitForIdle();
         bindings.Dispose();
@@ -405,10 +450,7 @@ class Program
         if (tsbutton)
         {
             DalamudLoadInfo = new DalamudOverlayInfoProxy();
-            DalamudUpdater = new DalamudUpdater(storage.GetFolder("dalamud"), storage.GetFolder("runtime"), storage.GetFolder("dalamudAssets"), storage.Root, null, null)
-            {
-                Overlay = DalamudLoadInfo
-            };
+            DalamudUpdater = CreateDalamudUpdater();
             DalamudUpdater.Run();
         }
     }
@@ -429,10 +471,9 @@ class Program
         foreach (string logfile in logfiles)
             if (storage.GetFile(logfile).Exists) storage.GetFile(logfile).Delete();
         if (tsbutton)
-            SetupLogging(mainargs);
+            SetupLogging(mainArgs);
 
     }
-
     public static void ClearAll(bool tsbutton = false)
     {
         ClearSettings(tsbutton);

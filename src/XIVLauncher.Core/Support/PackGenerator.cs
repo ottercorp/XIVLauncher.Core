@@ -1,10 +1,8 @@
-using Downloader;
-using System;
-using System.IO;
 using System.IO.Compression;
 using System.Text;
+
 using XIVLauncher.Common;
-using XIVLauncher.Core;
+
 using ZipArchive = System.IO.Compression.ZipArchive;
 
 namespace XIVLauncher.Core.Support
@@ -22,11 +20,11 @@ namespace XIVLauncher.Core.Support
             troubleEntry.Close();
 
             var xlLogFile = new FileInfo(Path.Combine(storage.GetFolder("logs").FullName, "launcher.log"));
-            var patcherLogFile = new FileInfo(Path.Combine(storage.Root.FullName, "patcher.log"));
-            var dalamudLogFile = new FileInfo(Path.Combine(storage.Root.FullName, "dalamud.log"));
-            var dalamudInjectorLogFile = new FileInfo(Path.Combine(storage.Root.FullName, "dalamud.injector.log"));
-            var dalamudBootLogFile = new FileInfo(Path.Combine(storage.Root.FullName, "dalamud.boot.log"));  
-            var ariaLogFile = new FileInfo(Path.Combine(storage.Root.FullName, "aria.log"));
+            var patcherLogFile = new FileInfo(Path.Combine(storage.GetFolder("logs").FullName, "patcher.log"));
+            var dalamudLogFile = new FileInfo(Path.Combine(storage.GetFolder("logs").FullName, "dalamud.log"));
+            var dalamudInjectorLogFile = new FileInfo(Path.Combine(storage.GetFolder("logs").FullName, "dalamud.injector.log"));
+            var dalamudBootLogFile = new FileInfo(Path.Combine(storage.GetFolder("logs").FullName, "dalamud.boot.log"));
+            var ariaLogFile = new FileInfo(Path.Combine(storage.GetFolder("logs").FullName, "aria.log"));
             var wineLogFile = new FileInfo(Path.Combine(storage.GetFolder("logs").FullName, "wine.log"));
 
             AddIfExist(xlLogFile, archive);

@@ -1,4 +1,5 @@
 using System.Numerics;
+
 using ImGuiNET;
 
 namespace XIVLauncher.Core;
@@ -6,7 +7,6 @@ namespace XIVLauncher.Core;
 public static class ImGuiHelpers
 {
     public static Vector2 ViewportSize => ImGui.GetIO().DisplaySize;
-
     public static float GlobalScale => ImGui.GetIO().FontGlobalScale;
 
     public static void TextWrapped(string text)
@@ -33,7 +33,7 @@ public static class ImGuiHelpers
         var window = (int)ImGui.GetWindowWidth();
         ImGui.SetCursorPosX(window / 2 - itemWidth / 2);
     }
-    
+
     public static void AddTooltip(string text)
     {
         if (ImGui.IsItemHovered())

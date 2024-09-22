@@ -1,5 +1,3 @@
-﻿using System.Net;
-
 namespace XIVLauncher.Core.Accounts;
 
 class AccountSwitcherEntry
@@ -32,11 +30,7 @@ class AccountSwitcherEntry
         }
         else
         {
-            using (var client = new WebClient())
-            {
-                imageBytes = client.DownloadData(uri);
-            }
-
+            imageBytes = Program.HttpClient.GetByteArrayAsync(uri).Result;
             File.WriteAllBytes(cacheFile, imageBytes);
         }
 
