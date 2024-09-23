@@ -97,7 +97,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources/fonts/FontAwesome5FreeSolid.otf"
       LogicalName="FontAwesome5FreeSolid.otf" />
-    <EmbeddedResource Include="Resources/fonts/NotoSansCJKjp-Regular.otf"
+    <EmbeddedResource Include="Resources/fonts/NotoSansCJKsc-Medium.otf"
       LogicalName="NotoSansCJKsc-Medium.otf" />
 
     <EmbeddedResource Include="Resources/logo.png" LogicalName="logo.png" />

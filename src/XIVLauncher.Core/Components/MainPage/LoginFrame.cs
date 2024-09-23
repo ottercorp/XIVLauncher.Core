@@ -1,6 +1,8 @@
 using System.Numerics;
 
 using ImGuiNET;
+
+using XIVLauncher.Common.Game;
 using XIVLauncher.Core.Accounts.Secrets.Providers;
 using XIVLauncher.Core.Components.Common;
 

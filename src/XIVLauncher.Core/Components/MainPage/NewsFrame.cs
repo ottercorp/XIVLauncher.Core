@@ -2,6 +2,9 @@ using System.Numerics;
 
 using ImGuiNET;
 
+using Serilog;
+using Serilog.Core;
+
 using XIVLauncher.Common;
 using XIVLauncher.Common.Game;
 
@@ -43,6 +46,7 @@ public class NewsFrame : Component
 
     public void ReloadNews()
     {
+        Log.Information("Reloading news");
         Task.Run(async () =>
         {
             this.newsLoaded = false;
@@ -53,7 +57,7 @@ public class NewsFrame : Component
 
             // await Headlines.GetMessage(this.app.Launcher, this.app.Settings.ClientLanguage ?? ClientLanguage.English);
 
-            headlines = await Headlines.GetNews(this.app.Launcher, this.app.Settings.ClientLanguage ?? ClientLanguage.English).ConfigureAwait(false);
+            headlines = await Headlines.GetNews(this.app.Launcher, this.app.Settings.ClientLanguage ?? ClientLanguage.ChineseSimplified).ConfigureAwait(false);
             bannerList = headlines.Banner;
 
             this.banners = new TextureWrap[bannerList.Count];
@@ -65,6 +69,7 @@ public class NewsFrame : Component
                 this.banners[i] = TextureWrap.Load(textureBytes);
             }
 
+            Log.Information("newsLoaded");
             this.newsLoaded = true;
         });
     }
@@ -124,7 +129,7 @@ public class NewsFrame : Component
             }
             else
             {
-                ImGui.Text("新闻加载中...");
+                ImGui.Text("新闻加载中....");
             }
 
             ImGui.PopStyleVar();

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Numerics;
 
 using CheapLoc;
@@ -181,7 +181,6 @@ public class MainPage : Page
                 false,
                 "",
                 App.Settings.GamePath!,
-                true,
                 ClientLanguage.ChineseSimplified,
                 false,
                 DpiAwareness.Unaware
@@ -939,7 +938,6 @@ public class MainPage : Page
             Area.AreaConfigUpload,
             App.Settings.AdditionalArgs,
             App.Settings.GamePath,
-            App.Settings.IsDx11.GetValueOrDefault(true),
             false,
             App.Settings.DpiAwareness.GetValueOrDefault(DpiAwareness.Unaware));
 
@@ -1219,21 +1217,8 @@ public class MainPage : Page
 
         var sdoPatchMissingFailureLoc = Loc.Localize("SdoPatchMissing",
             "游戏补丁列表的早期补丁被删除，无法通过补丁安装完整游戏，请手动安装游戏客户端并在设置中设定包含 game 文件夹的游戏路径。\nContext: {0}\n{1}");
-
-        switch (reason)
-        {
-            case PatchManager.FailReason.DownloadProblem:
-                var errorMsg = (versionId.StartsWith("2014.03.24")) ? sdoPatchMissingFailureLoc : dlFailureLoc;
-                App.ShowMessageBlocking(string.Format(errorMsg, "Problem", versionId), "XIVLauncherCN Error");
-                break;
-
-            case PatchManager.FailReason.HashCheck:
-                App.ShowMessageBlocking(string.Format(dlFailureLoc, "IsHashCheckPass", versionId), "XIVLauncherCN Error");
-                break;
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(reason), reason, null);
-        }
+        var errorMsg = (patch.VersionId.StartsWith("2014.03.24")) ? sdoPatchMissingFailureLoc : dlFailureLoc;
+        App.ShowMessageBlocking(string.Format(errorMsg, "Problem", patch.VersionId), "XIVLauncherCN Error");
 
         Environment.Exit(0);
     }
