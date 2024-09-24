@@ -109,6 +109,8 @@ jobs:
 
           # Commit the changes.
           git add .
+          git config user.name ${{ env.COMMIT_USER }}
+          git config user.email ${{ env.COMMIT_EMAIL }}
           git commit -m "Update to ${{ github.ref_name }}"
 
           # Get the remote url and splice the token into it.
