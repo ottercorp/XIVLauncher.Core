@@ -1026,6 +1026,8 @@ public class MainPage : Page
 
     private async Task<bool> HandleBootCheck()
     {
+        // CN
+        return true;
         try
         {
             if (App.Settings.PatchPath is { Exists: false })
