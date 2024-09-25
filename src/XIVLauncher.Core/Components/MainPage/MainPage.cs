@@ -173,15 +173,16 @@ public class MainPage : Page
             else
                 gameRunner = new UnixGameRunner(Program.CompatibilityTools, null, false);
 
-            App.Launcher.LaunchGame(
+            var launchedProcess = App.Launcher.LaunchGameSdo(
                 gameRunner,
                 "0",
-                1,
-                2,
-                false,
+                "0",
+                "1",
+                "2",
+                "",
+                "",
                 "",
                 App.Settings.GamePath!,
-                ClientLanguage.ChineseSimplified,
                 false,
                 DpiAwareness.Unaware
             );
