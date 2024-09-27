@@ -163,14 +163,12 @@ public class LoginFrame : Component
                 {
                     this.OnLogin?.Invoke(LoginAction.GameNoLaunch);
                 }
-                /*
                 ImGui.Separator();
 
                 if (ImGui.MenuItem("修复游戏"))
                 {
                     this.OnLogin?.Invoke(LoginAction.Repair);
                 }
-                */
 
                 ImGui.Separator();
 

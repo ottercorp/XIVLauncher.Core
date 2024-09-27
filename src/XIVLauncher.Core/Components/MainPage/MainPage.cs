@@ -248,8 +248,8 @@ public class MainPage : Page
             }
             var enableUidCache = App.Settings.IsUidCacheEnabled ?? false;
             var gamePath = App.Settings.GamePath!;
-            var checkResult = await App.Launcher.CheckGameUpdate(Area, gamePath, false);
-            if (checkResult.State == Launcher.LoginState.NeedsPatchGame)
+            var checkResult = await App.Launcher.CheckGameUpdate(Area, gamePath, action == LoginAction.Repair);
+            if (checkResult.State == Launcher.LoginState.NeedsPatchGame || action == LoginAction.Repair)
                 return checkResult;
             string? autoLoginSessionKey = null;
             var autoLogin = string.IsNullOrEmpty(password) && this.loginFrame.IsAutoLogin;
@@ -343,24 +343,11 @@ public class MainPage : Page
         {
             try
             {
-                if (loginResult.State == Launcher.LoginState.NeedsPatchGame)
-                {
-                    if (!await RepairGame(loginResult).ConfigureAwait(false))
-                        return false;
+                if (!await RepairGame(loginResult).ConfigureAwait(false))
+                    return false;
 
-                    loginResult.State = Launcher.LoginState.Ok;
-                    action = LoginAction.Game;
-                }
-                else
-                {
-                    /*
-                    CustomMessageBox.Show(
-                        Loc.Localize("LoginRepairResponseIsNotNeedsPatchGame",
-                            "The server sent an incorrect response - the repair cannot proceed."),
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error, parentWindow: _window);
-                        */
-                    throw new OauthLoginException(preErrorMsg + "Repair login state not NeedsPatchGame" + postErrorMsg);
-                }
+                App.ShowMessageBlocking("游戏修复完毕，请重新登陆。");
+                return false;
             }
             catch (Exception)
             {
@@ -1237,7 +1224,6 @@ public class MainPage : Page
 
     private async Task<bool> RepairGame(Launcher.LoginResult loginResult)
     {
-        /*
         var doLogin = false;
 
         // BUG(goat): This check only behaves correctly on Windows - the mutex doesn't seem to disappear on Linux, .NET issue?
@@ -1252,23 +1238,22 @@ public class MainPage : Page
             return false; // This line will not be run.
         }
 #endif
-
+        /*
         Debug.Assert(loginResult.PendingPatches != null, "loginResult.PendingPatches != null ASSERTION FAILED");
         Debug.Assert(loginResult.PendingPatches.Length != 0, "loginResult.PendingPatches.Length != 0 ASSERTION FAILED");
+        */
 
         Log.Information("STARTING REPAIR");
 
         // TODO: bundle the PatchInstaller with xl-core on Windows and run this remotely
-        using var verify = new PatchVerifier(Program.CommonSettings, loginResult, TimeSpan.FromMilliseconds(100), loginResult.OauthLogin.MaxExpansion, false);
+        var maxExpansion = 5;
+        using var verify = new PatchVerifier(Program.CommonSettings, loginResult, TimeSpan.FromMilliseconds(100), maxExpansion, false);
 
         for (bool doVerify = true; doVerify;)
         {
-            this.App.StartLoading($"Now repairing...", canCancel: false, isIndeterminate: false);
+            this.App.StartLoading($"正在修复...", canCancel: false, isIndeterminate: false);
 
             verify.Start();
-                await verify.WaitForCompletion().ConfigureAwait(false);
-
-                progressDialog.Dispatcher.Invoke(progressDialog.Hide);
 
             var timer = new Timer(new TimerCallback((object? obj) =>
             {
@@ -1307,9 +1292,9 @@ public class MainPage : Page
                     // TODO: ask the user if they want to login or rerun after repair
                     App.ShowMessageBlocking(verify.NumBrokenFiles switch
                     {
-                        0 => Loc.Localize("GameRepairSuccess0", "All game files seem to be valid."),
-                        1 => Loc.Localize("GameRepairSuccess1", "XIVLauncher has successfully repaired 1 game file."),
-                        _ => string.Format(Loc.Localize("GameRepairSuccessPlural", "XIVLauncher has successfully repaired {0} game files."), verify.NumBrokenFiles),
+                        0 => Loc.Localize("GameRepairSuccess0", "所有的游戏文件都是完整的。"),
+                        1 => Loc.Localize("GameRepairSuccess1", "XIVLauncherCN 已成功修复 1 个游戏文件。"),
+                        _ => string.Format(Loc.Localize("GameRepairSuccessPlural", "XIVLauncherCN 已成功修复 {0} 个游戏文件。"), verify.NumBrokenFiles),
                     });
 
                     doVerify = false;
@@ -1321,11 +1306,11 @@ public class MainPage : Page
                     if (verify.LastException is NoVersionReferenceException)
                     {
                         App.ShowMessageBlocking(Loc.Localize("NoVersionReferenceError",
-                                                        "The version of the game you are on cannot be repaired by XIVLauncher yet, as reference information is not yet available.\nPlease try again later."));
+                                                        "您所使用的游戏版本尚无法通过 XIVLauncherCN 修复，因为尚无参考信息。\n请稍后重试。"));
                     }
                     else
                     {
-                        App.ShowMessageBlocking(verify.LastException + "\n\n" + Loc.Localize("GameRepairError", "An error occurred while repairing the game files.\nYou may have to reinstall the game."));
+                        App.ShowMessageBlocking(verify.LastException + "\n\n" + Loc.Localize("GameRepairError", "修复游戏文件时出现错误。\n您需要重新安装游戏。"));
                     }
 
                     doVerify = false;
@@ -1337,20 +1322,8 @@ public class MainPage : Page
             }
         }
 
-            progressDialog.Dispatcher.Invoke(progressDialog.Close);
-            mutex.Close();
-            mutex = null;
-        }
-        else
-        {
-            CustomMessageBox.Show(Loc.Localize("PatcherAlreadyInProgress", "XIVLauncher is already patching your game in another instance. Please check if XIVLauncher is still open."), "XIVLauncher",
-                MessageBoxButton.OK, MessageBoxImage.Error, parentWindow: _window);
-        }
 
         return doLogin;
-        */
-
-        throw new NotImplementedException();
     }
 
     private void Hide()
