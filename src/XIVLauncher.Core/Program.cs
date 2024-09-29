@@ -129,6 +129,7 @@ sealed class Program
         Config.DxvkAsyncEnabled ??= true;
         Config.ESyncEnabled ??= true;
         Config.FSyncEnabled ??= false;
+        Config.MSyncEnabled ??= true;
         Config.DxmtEnabled ??= false;
         Config.MetalFxEnabled ??= false;
         Config.MetalFxFactor ??= 2;
@@ -373,7 +374,7 @@ sealed class Program
     {
         var wineLogFile = new FileInfo(Path.Combine(storage.GetFolder("logs").FullName, "wine.log"));
         var winePrefix = storage.GetFolder("wineprefix");
-        var wineSettings = new WineSettings(Config.WineStartupType, Config.WineBinaryPath, Config.WineDebugVars, wineLogFile, winePrefix, Config.ESyncEnabled, Config.FSyncEnabled, Config.ModernMvkEnabled, Config.WineEnv);
+        var wineSettings = new WineSettings(Config.WineStartupType, Config.WineBinaryPath, Config.WineDebugVars, wineLogFile, winePrefix, Config.ESyncEnabled, Config.FSyncEnabled, Config.MSyncEnabled, Config.ModernMvkEnabled, Config.WineEnv);
         var toolsFolder = storage.GetFolder("compatibilitytool");
         Directory.CreateDirectory(Path.Combine(toolsFolder.FullName, "dxvk"));
         Directory.CreateDirectory(Path.Combine(toolsFolder.FullName, "beta"));

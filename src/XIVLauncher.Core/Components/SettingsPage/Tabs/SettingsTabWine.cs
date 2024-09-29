@@ -77,6 +77,10 @@ public class SettingsTabWine : SettingsTab
             {
                 CheckVisibility = () => RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
             },
+            new SettingsEntry<bool>("Enable MSync", "Enable MSync.", () => Program.Config.MSyncEnabled ?? true, b => Program.Config.MSyncEnabled = b)
+            {
+                CheckVisibility = () => RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+            },
             new SettingsEntry<bool>("Enable FSync", "Enable fast user mutex (futex2).", () => Program.Config.FSyncEnabled ?? true, b => Program.Config.FSyncEnabled = b)
             {
                 CheckVisibility = () => RuntimeInformation.IsOSPlatform(OSPlatform.Linux),

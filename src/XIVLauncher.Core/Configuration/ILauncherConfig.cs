@@ -72,6 +72,7 @@ public interface ILauncherConfig
     public bool? ESyncEnabled { get; set; }
 
     public bool? FSyncEnabled { get; set; }
+    public bool? MSyncEnabled { get; set; }
 
     public bool? ModernMvkEnabled { get; set; }
     public bool? DxmtEnabled { get; set; }
