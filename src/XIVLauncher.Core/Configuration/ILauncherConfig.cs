@@ -74,6 +74,9 @@ public interface ILauncherConfig
     public bool? FSyncEnabled { get; set; }
 
     public bool? ModernMvkEnabled { get; set; }
+    public bool? DxmtEnabled { get; set; }
+    public bool? MetalFxEnabled { get; set; }
+    public int? MetalFxFactor { get; set; }
 
     public Dxvk.DxvkHudType DxvkHudType { get; set; }
 

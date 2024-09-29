@@ -42,6 +42,35 @@ public class SettingsTabWine : SettingsTab
 #endif
 
             new SettingsEntry<bool>("Enable DXVK ASYNC", "Enable DXVK ASYNC patch.", () => Program.Config.DxvkAsyncEnabled ?? true, b => Program.Config.DxvkAsyncEnabled = b),
+            new SettingsEntry<bool>("Enable DXMT", "Use direct translation of D3D11 to Metal via DXMT.", () => Program.Config.DxmtEnabled ?? true, b => Program.Config.DxmtEnabled = b)
+            {
+                CheckVisibility = () => RuntimeInformation.IsOSPlatform(OSPlatform.OSX),
+                CheckValidity = b =>
+                {
+                    if (b == true && Environment.OSVersion.Version.Major < 14)
+                        return "MacOS 14.0 or higher is required for DXMT.";
+
+                    return null;
+                }
+            },
+            new SettingsEntry<bool>("Enable MetalFX", "Enable MetalFX spatial upscaling.", () => Program.Config.MetalFxEnabled ?? true, b => Program.Config.MetalFxEnabled = b)
+            {
+                CheckVisibility = () => RuntimeInformation.IsOSPlatform(OSPlatform.OSX),
+                CheckValidity = b =>
+                {
+                    if (b == true && Environment.OSVersion.Version.Major < 14)
+                        return "MacOS 14.0 or higher is required for DXMT.";
+
+                    return null;
+                }
+            },
+            /*
+            new NumericSettingsEntry("MetalFX Factor", "The upscaling factor for MetalFX", () => Program.Config.MetalFxFactor ?? 2, factor => Program.Config.MetalFxFactor = factor, 0, 10, 1)
+            {
+                CheckVisibility = () => RuntimeInformation.IsOSPlatform(OSPlatform.OSX),
+            },
+            */
+
             new SettingsEntry<bool>("Enable ESync", "Enable eventfd-based synchronization.", () => Program.Config.ESyncEnabled ?? true, b => Program.Config.ESyncEnabled = b),
 
             new SettingsEntry<bool>("Enable Modern MoltenVK", "Enable modern MoltenVK.", () => Program.Config.ModernMvkEnabled ?? true, b => Program.Config.ModernMvkEnabled = b)

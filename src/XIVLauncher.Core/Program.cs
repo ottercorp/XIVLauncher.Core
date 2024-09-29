@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 using CheapLoc;
 
@@ -128,6 +129,9 @@ sealed class Program
         Config.DxvkAsyncEnabled ??= true;
         Config.ESyncEnabled ??= true;
         Config.FSyncEnabled ??= false;
+        Config.DxmtEnabled ??= false;
+        Config.MetalFxEnabled ??= false;
+        Config.MetalFxFactor ??= 2;
         Config.SetWin7 ??= true;
 
         Config.WineStartupType ??= WineStartupType.Managed;
@@ -373,7 +377,20 @@ sealed class Program
         var toolsFolder = storage.GetFolder("compatibilitytool");
         Directory.CreateDirectory(Path.Combine(toolsFolder.FullName, "dxvk"));
         Directory.CreateDirectory(Path.Combine(toolsFolder.FullName, "beta"));
-        CompatibilityTools = new CompatibilityTools(wineSettings, Config.DxvkHudType, Config.GameModeEnabled, Config.DxvkAsyncEnabled, Config.DxvkFrameLimit, toolsFolder);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            Directory.CreateDirectory(Path.Combine(toolsFolder.FullName, "dxmt"));
+        }
+        CompatibilityTools = new CompatibilityTools(
+            wineSettings,
+            Config.DxvkHudType, 
+            Config.GameModeEnabled,
+            Config.DxvkAsyncEnabled,
+            Config.DxvkFrameLimit,
+            toolsFolder,
+            Config.DxmtEnabled,
+            Config.MetalFxEnabled,
+            Config.MetalFxFactor);
     }
 
     public static void ShowWindow()
@@ -460,6 +477,10 @@ sealed class Program
         storage.GetFolder("compatibilitytool").Delete(true);
         storage.GetFolder("compatibilitytool/beta");
         storage.GetFolder("compatibilitytool/dxvk");
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            storage.GetFolder("compatibilitytool/dxmt");
+        }
         if (tsbutton) CreateCompatToolsInstance();
     }
 
